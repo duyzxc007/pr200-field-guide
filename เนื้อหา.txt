@@ -1,0 +1,3814 @@
+สอนใช้เครื่อง pr200 ของ R&S และแนะนำฟังชั่น ยูสเคส และเทคนิคต่างๆ  
+
+ได้ครับ ถ้าจะใช้ Rohde & Schwarz R&S®PR200 ให้คล่องในงานจริง ผมแนะนำให้คิดว่ามันไม่ใช่แค่ Spectrum Analyzer แต่เป็น Portable Monitoring Receiver สำหรับงาน Detect → Analyze → Locate → Record โดยเฉพาะงาน Spectrum Monitoring / Interference Hunting / Site Survey / DF ที่คุณทำอยู่
+
+PR200 ครอบคลุม 8 kHz–8 GHz, real-time bandwidth สูงสุด 40 MHz และ Panorama Scan ได้สูงสุดประมาณ 60 GHz/s; ถ้ามี antenna/downconverter ที่รองรับสามารถขยายการตรวจจับได้ถึง 20 หรือ 33 GHz ตามอุปกรณ์ที่ใช้
+
+1. ก่อนอื่น ต้องเข้าใจ 6 งานหลักของ PR200
+งาน	Function ที่ใช้	ใช้ทำอะไร
+ดูสัญญาณเฉพาะความถี่	Receiver	Monitor/ฟัง/วัด signal
+กวาดหาสัญญาณ	Panorama Scan / PScan	หา unknown signal กว้าง ๆ
+ดูสัญญาณตามเวลา	Waterfall / Polychrome	หา intermittent/burst signal
+วิเคราะห์สัญญาณ	Measurement	Level, BW, modulation ฯลฯ
+ตามหาต้นทาง	Homing / DF / Map	หา direction/location
+เก็บหลักฐาน	Record / Replay / IQ	กลับมาวิเคราะห์ภายหลัง
+
+นี่คือ workflow ที่ผมแนะนำให้ใช้หน้างาน:
+
+กวาดกว้าง → เจอสัญญาณ → Zoom → ตั้ง RBW/BW → ดู Waterfall → Demod → วัด → DF/Homing → บันทึก
+
+2. เริ่มจาก Receiver Mode ก่อน
+
+สมมติเราต้องตรวจว่ามีสัญญาณที่
+
+138.000 MHz
+
+เข้า Receiver app แล้วตั้งประมาณ:
+
+Frequency     = 138.000 MHz
+Demodulation  = FM / AM ตามประเภท signal
+Demod BW      = ให้เหมาะกับ signal
+RF Attenuation= Auto ก่อน
+Squelch       = ต่ำหรือ Off ตอนค้นหา
+
+หน้าจอหลักจะเห็นประมาณ
+
+        Spectrum
+
+Level
+  │
+  │                ╭──────╮
+  │_______________╯      ╰____________
+                  ↑
+               138 MHz
+
+---------------------------------------
+           Waterfall
+---------------------------------------
+              ███
+              ███
+              ███
+              ███
+---------------------------------------
+              Time ↓
+Spectrum บอกอะไร
+
+แกนนอน = Frequency
+แกนตั้ง = Signal Level
+
+ถ้ามียอดขึ้นตรง 138 MHz แสดงว่ามีพลังงาน RF อยู่ตรงนั้น
+
+แต่ ยังไม่ได้หมายความว่าเป็น signal ที่เราต้องการ
+
+อาจเป็น
+
+transmitter จริง
+harmonic
+intermodulation
+leakage
+spurious
+noise
+overload artifact
+
+นี่เป็นจุดสำคัญมากในงาน interference hunting
+
+3. Waterfall คือ Function ที่ควรใช้ตลอด
+
+Spectrum เป็นเหมือนภาพถ่ายหนึ่งขณะ
+
+แต่ Waterfall คือ
+
+Spectrum + เวลา
+
+เช่น
+
+Frequency →
+
+─────────█────────────
+─────────█────────────
+─────────█────────────
+──────────────────────
+─────────█────────────
+──────────────────────
+─────────█────────────
+          ↓
+         signal
+
+จะเห็นว่า signal เปิด/ปิดเป็นช่วง
+
+ใช้หาได้ดีมากกับ
+
+radio burst
+telemetry
+remote control
+intermittent interference
+digital transmission
+transmitter ที่ส่งเป็นช่วง
+interference จาก switching device
+
+สำหรับงานหน้างาน ผมมักให้ความสำคัญกับ Waterfall มากกว่า Spectrum snapshot
+
+4. Panorama Scan — ตัวหา Signal หลัก
+
+ถ้าคุณยังไม่รู้ว่า interference อยู่ตรงไหน ใช้ PScan
+
+R&S แนะนำว่า ถ้าช่วงที่ต้องการค้นหากว้างกว่า real-time bandwidth 40 MHz ให้ใช้ PScan ส่วนช่วงเล็กกว่า 40 MHz สามารถใช้ Receiver mode ได้โดยตรง
+
+ตัวอย่างต้องการตรวจ
+
+100 MHz ───────── 1000 MHz
+
+เข้า
+
+APP
+↓
+PScan
+↓
+App Config
+↓
+Scan Range
+
+ตั้ง
+
+Start = 100 MHz
+Stop  = 1000 MHz
+
+หลักสำคัญคือ
+
+Scan Resolution ควรละเอียดกว่า bandwidth ของ signal ที่เล็กที่สุดที่เราคาดว่าจะเจอ
+
+R&S ระบุหลักนี้เช่นเดียวกันใน application note สำหรับ RF survey/spectrum clearing
+
+ตัวอย่าง
+
+หาสัญญาณประมาณ 25 kHz wide
+
+อย่าตั้ง resolution
+
+100 kHz
+
+เพราะอาจมองข้าม signal
+
+ให้ใช้ประมาณ
+
+10 kHz
+
+หรือเหมาะสมกับงานแทน
+
+5. เทคนิคค้นหา Unknown Interference
+
+ผมใช้ workflow นี้
+
+1. PScan กว้าง
+      ↓
+2. หา Peak / สิ่งผิดปกติ
+      ↓
+3. Marker ไปที่ Peak
+      ↓
+4. Tune Receiver ไป Frequency นั้น
+      ↓
+5. ลด Span
+      ↓
+6. ปรับ RBW
+      ↓
+7. เปิด Waterfall
+      ↓
+8. ดูรูปแบบ signal
+      ↓
+9. Demod ถ้าทำได้
+      ↓
+10. Homing / DF
+
+อย่าเริ่มด้วย Span แคบมาก เพราะคุณอาจหา interference ไม่เจอทั้งที่มันอยู่ห่างไปไม่กี่ MHz
+
+6. RBW เป็นสิ่งที่ต้องเข้าใจ
+
+RBW = Resolution Bandwidth
+
+คิดง่าย ๆ ว่าเป็น
+
+ความละเอียดที่ Receiver ใช้แยกสัญญาณใกล้กัน
+
+RBW ใหญ่
+
+ข้อดี
+
+Scan เร็ว
+เห็น signal ง่าย
+
+ข้อเสีย
+
+แยก signal ใกล้กันไม่ดี
+noise floor สูงขึ้น
+RBW เล็ก
+
+ข้อดี
+
+แยก signal ได้ละเอียด
+เห็น narrowband signal ดี
+
+ข้อเสีย
+
+scan ช้าลง
+
+ตัวอย่าง
+
+Signal A      Signal B
+
+RBW ใหญ่
+
+       ╭──────────╮
+───────╯          ╰──────
+
+เหมือน signal เดียว
+
+
+RBW เล็ก
+
+      ╭─╮      ╭─╮
+──────╯ ╰──────╯ ╰─────
+
+เห็นเป็น 2 signal
+7. Attenuator — สำคัญมากเวลาหน้างาน
+
+PR200 มี preselection filtering และ automatic overload protection แต่การตรวจสอบ overload ยังสำคัญมาก
+
+สมมติอยู่ใกล้
+
+FM broadcast tower
+cellular BTS
+high-power transmitter
+
+แล้วเห็น spectrum แปลก ๆ เต็มไปหมด
+
+อย่าเพิ่งสรุปว่ามี interference จริง
+
+ลอง
+
+RF ATT
+0 dB
+↓
+10 dB
+↓
+20 dB
+
+แล้วดู signal
+
+ถ้า signal จริง
+
+เพิ่ม attenuation 10 dB
+
+signal มักลดประมาณใกล้เคียงกัน
+
+ถ้าเป็น receiver overload/intermod
+
+บาง peak อาจ
+
+หาย
+ลดผิดสัดส่วน
+spectrum สะอาดขึ้นทันที
+
+นี่เป็นเทคนิคที่สำคัญมากในการแยก
+
+Real RF Signal
+
+ออกจาก
+
+receiver-generated artifact
+
+8. Polychrome Spectrum — Function ที่ดีมากแต่คนใช้ไม่เยอะ
+
+PR200 มี option R&S CS-PC Polychrome Spectrum
+
+มันไม่ได้แค่แสดงระดับ signal
+
+แต่แสดง ความถี่ที่ signal แต่ละระดับเกิดขึ้น
+
+เช่น
+
+แดง     = เกิดบ่อยมาก
+เหลือง  = ปานกลาง
+เขียว   = น้อย
+น้ำเงิน  = เกิดน้อยมาก
+
+จึงช่วยหา signal ที่
+
+ออกมา 10 ms
+หายไป
+ออกมา 10 ms
+หายไป
+
+ซึ่ง Spectrum ปกติอาจพลาด
+
+R&S ระบุว่า Polychrome สามารถเผยสัญญาณที่อาจมองไม่เห็นจาก spectrum แบบทั่วไปได้
+
+9. Zero Span / Time Domain
+
+นี่มีประโยชน์มากสำหรับงาน RF troubleshooting
+
+แทนที่จะดู
+
+Amplitude vs Frequency
+
+เปลี่ยนเป็น
+
+Amplitude vs Time
+
+เช่น
+
+Power
+ │
+ │    ████        ████
+ │    ████        ████
+ │____████________████_______ Time
+
+คุณจะเห็นว่า transmitter
+
+เปิดกี่ ms
+ปิดกี่ ms
+burst period เท่าไร
+duty cycle ประมาณไหน
+
+PR200 รองรับ simultaneous frequency/time-domain analysis ผ่าน option CS-ZS
+
+10. Gated Spectrum — ทีเด็ดสำหรับ TDD
+
+อันนี้น่าสนใจมากสำหรับงาน 4G/5G
+
+ปัญหาเช่นมี
+
+5G TDD signal ใหญ่มาก
+
+แล้วมี interference เล็ก ๆ ซ่อนอยู่ข้างใน
+
+Spectrum ธรรมดาอาจมองไม่เห็น
+
+PR200 สามารถกำหนดช่วงเวลา เช่น
+
+DL
+████████
+
+Guard
+__
+
+UL
+██████
+
+แล้วให้ Receiver ดูเฉพาะ
+
+     ↓
+DL ████ | Guard | ███ UL
+          ↑
+       Measure
+
+R&S ยกตัวอย่างการใช้ gated spectrum เพื่อตรวจ interference ในช่วง guard interval ของ 5G TDD โดยสามารถกำหนด period, gate length และ gate position ได้ ฟังก์ชันนี้ต้องมี CS-ZS
+
+11. Manual Homing
+
+ถ้าคุณมี R&S HE400 directional antenna
+
+นี่เป็นหนึ่งใน use case หลักของ PR200
+
+สมมติ interference อยู่แถวโรงงาน
+
+        ?
+        ↑
+
+ ←   คุณ   →
+      PR200
+      HE400
+
+หมุน antenna
+
+0°
+45°
+90°
+135°
+180°
+
+ดู signal level
+
+ทิศที่ level สูงขึ้นคือ candidate direction
+
+จากนั้นเดินเข้าไป
+
+-85 dBm
+↓
+-72 dBm
+↓
+-61 dBm
+↓
+-45 dBm
+
+โดยทั่วไปหมายถึงเข้าใกล้แหล่งกำเนิด
+
+PR200 รองรับ manual homing และเมื่อใช้ระบบ DF/อุปกรณ์ที่รองรับยังสามารถทำ automatic DF/triangulation ได้
+
+12. เทคนิค Homing ที่สำคัญ
+
+อย่าใช้ gain สูงตลอด
+
+ตอนอยู่ไกลใช้ sensitivity สูง
+
+ATT 0 dB
+
+พอเข้าใกล้ transmitter
+
+signal อาจชนเต็ม scale เช่น
+
+█████████████████████
+
+ทำให้แยกไม่ได้ว่า
+
+ทางไหนใกล้กว่า
+
+ให้เพิ่ม attenuation เช่น
+
+10 dB
+20 dB
+30 dB
+
+เป้าหมายคือให้ signal อยู่กลาง dynamic range
+
+เช่น
+
+-85 → -70 → -55 → -40 dBm
+
+แทนที่จะ
+
+-30
+-30
+-30
+-30
+13. Multipath คือศัตรูของ DF
+
+โดยเฉพาะที่คุณเคยเจอกับย่าน FM
+
+ในเมืองหรือสถานีไฟฟ้า
+
+             Building
+               /
+TX ───────────/
+ \            /
+  \__________/
+       reflected signal
+
+Receiver อาจรับ
+
+Direct path
++
+Reflection
+
+ทำให้ bearing กระโดด
+
+ตัวอย่าง
+
+20°
+↓
+75°
+↓
+310°
+↓
+40°
+
+ไม่ได้แปลว่า DF เสียเสมอไป
+
+ให้ลอง
+
+เปลี่ยนตำแหน่ง 5–20 m
+หาพื้นที่โล่ง
+เพิ่ม attenuation ถ้า signal แรงมาก
+หลีกเลี่ยงกำแพง/เสาเหล็ก/รถ
+วัดหลายจุด
+
+แล้วดู bearing ที่เกิดซ้ำ
+
+14. Mapping / Triangulation
+
+ถ้ามี CS-MAP
+
+สามารถเอาผล measurement มาผูกกับแผนที่ได้
+
+ตัวอย่างวัด bearing สามจุด
+
+Station A
+     \
+      \
+       \
+        X ← Source
+       /
+      /
+Station B
+
+        \
+         Station C
+
+จุดตัดโดยประมาณคือ candidate location
+
+ดีกว่าเดินตาม signal level เพียงอย่างเดียวมาก โดยเฉพาะในเมืองที่ multipath สูง
+
+15. Level Mapping
+
+อีก use case ที่เหมาะกับงานของคุณมาก
+
+เดินหรือขับรถเก็บ
+
+GPS
++
+Frequency
++
+Level
+
+แล้วสร้างแผนที่
+
+-40 dBm   █████
+-60 dBm   ███
+-80 dBm   █
+
+ใช้สำหรับ
+
+หา coverage
+หาจุด interference
+leakage survey
+site survey
+coverage comparison
+transmitter hunting
+16. Recording / Replay
+
+PR200 มี option CS-IR
+
+สามารถ record/replay
+
+Spectrum trace
+Measurement results
+Audio
+
+และ CS-IQ สามารถบันทึก/replay/analyze IQ data สูงสุด 40 MHz จาก internal memory ได้
+
+สำหรับงานตรวจรับ ผมมองว่านี่สำคัญมาก
+
+แทนที่จะบันทึกแค่
+
+พบ interference 138 MHz
+
+ควรเก็บ
+
+Frequency
+Time
+GPS
+Level
+Spectrum screenshot
+Waterfall
+Demodulation
+Measurement
+Audio/IQ ถ้าจำเป็น
+
+ภายหลังสามารถพิสูจน์และวิเคราะห์ย้อนหลังได้
+
+17. Function หลักที่ผมแนะนำให้คุณฝึก
+
+PR200 มี option/function หลักประมาณนี้ตามข้อมูล R&S ปัจจุบัน
+
+Function	Option	ผมให้ความสำคัญ
+Receiver	Base	★★★★★
+Panorama Scan	CS-PS	★★★★★
+Waterfall	Base/measurement	★★★★★
+Polychrome	CS-PC	★★★★☆
+Field Strength	CS-FS	★★★★☆
+Modulation Measurement	CS-MM	★★★☆☆
+Occupied BW / Channel Power	CS-SPM	★★★★☆
+Zero Span/Time Domain	CS-ZS	★★★★★
+DF	CS-DF	★★★★★
+Record/Replay	CS-IR	★★★★☆
+IQ Recording	CS-IQ	★★★★☆
+Map	CS-MAP	★★★★★
+Timestamp/GNSS	CS-TSA	★★★☆☆
+
+แต่ต้องตรวจ license ในเครื่องของคุณก่อน เพราะ ไม่ใช่ PR200 ทุกเครื่องจะมี option เหล่านี้ครบ
+
+18. Use Case ที่เหมาะกับงานของคุณ
+Case 1 — Monitoring รับได้ แต่ DF ไม่ขึ้น
+
+กรณีคล้ายงานที่คุณเคยเจอ
+
+Monitoring
+138 MHz = Signal ✓
+
+DF
+138 MHz = No Bearing
+
+อย่าเพิ่งสรุป DF เสีย
+
+ตรวจลำดับนี้
+
+Signal present?
+      ↓ YES
+Level เพียงพอ?
+      ↓
+DF antenna รองรับย่าน?
+      ↓
+DF bandwidth ถูก?
+      ↓
+Signal duration ยาวพอ?
+      ↓
+DF Quality?
+      ↓
+Overload?
+      ↓
+Multipath?
+      ↓
+Cable / antenna / calibration
+
+อันนี้แยกปัญหาออกจากกันได้เร็วมาก
+
+Case 2 — FM Bearing ผิด แต่ 530 MHz ถูก
+
+ถ้า
+
+530 MHz → bearing ถูก
+FM      → bearing ผิด
+
+ผมจะสงสัย environment ก่อน hardware
+
+โดยเฉพาะ
+
+Multipath
+Strong FM Broadcast
+Receiver overload
+Antenna surroundings
+
+ทดลอง
+
+FM เดิม
+↓
+ATT +10 dB
+↓
++20 dB
+↓
+ย้ายตำแหน่ง
+↓
+เทียบ bearing
+
+ถ้าค่าเริ่มนิ่ง แสดงว่ามีแนวโน้มเป็น RF environment มากกว่าระบบ DF เสีย
+
+19. Preset ที่ผมแนะนำให้สร้าง
+
+ถ้า firmware/configuration รองรับการบันทึก configuration ผมจะแยก preset แบบนี้
+
+01_FAST_SURVEY
+PScan
+wide span
+fast scan
+Auto ATT
+
+02_NARROW_SIGNAL
+Receiver
+narrow span
+waterfall
+low RBW
+
+03_INTERFERENCE
+Receiver
+Max Hold
+Waterfall
+Polychrome
+
+04_DF
+DF/Homing
+appropriate BW
+
+05_TDD_HUNT
+Gated Spectrum
+Zero Span
+
+06_RECORD
+Spectrum + IQ/Trace Record
+
+หน้างานจะเร็วกว่านั่งปรับใหม่ทุกครั้งมาก
+
+20. สูตรใช้งาน PR200 ที่อยากให้จำ
+หาสัญญาณ
+
+Wide → Narrow
+
+ไม่ใช่ Narrow ตั้งแต่ต้น
+
+เข้าใกล้แหล่งกำเนิด
+
+Sensitive → Attenuate
+
+Signal มา ๆ หาย ๆ
+
+Spectrum → Waterfall → Polychrome
+
+สงสัย pulse/TDD
+
+Frequency Domain → Time Domain / Gated Spectrum
+
+สงสัยตำแหน่ง
+
+Level → Homing → DF → Multiple positions → Map
+
+Spectrum แปลกมาก
+
+อย่าเพิ่งเชื่อ → เพิ่ม ATT ตรวจ overload ก่อน
+
+ถ้าผมเป็นคนเทรนคุณใช้ PR200
+
+ผมจะแบ่งเป็น 7 บท
+
+รู้จักเครื่อง / Port / ปุ่ม / UI / Antenna
+Receiver + Spectrum + Waterfall + Demodulation
+Panorama Scan + Marker + RBW + Threshold
+Interference Hunting + Overload + Polychrome
+Zero Span + Burst + TDD + Gated Spectrum
+HE400 + Homing + Automatic DF + Multipath
+Map + Triangulation + Recording + วิธีทำ Report หน้างาน
+
+และผมแนะนำให้เราเรียนแบบนี้ต่อ เพราะจะใช้ได้จริงกว่าอ่าน manual ยาว ๆ
+
+บทถัดไปผมสามารถพาใช้ PR200 แบบจับมือทำเลย ตั้งแต่ “เครื่องอยู่ตรงหน้า → เสียบ antenna ช่องไหน → กดปุ่มไหน → ตั้ง Frequency/RBW/Span/ATT/Squelch ตรงไหน → อ่านหน้าจออย่างไร” แล้วค่อยจำลองโจทย์จริง เช่น หา interference ที่ 138 MHz, ตามหา FM transmitter และทำ DF/Homing ด้วย HE400 โดยอิงเมนูของ PR200 จริงครับ
+
+บทที่ 4 — HE400 + Manual DF / Homing แบบเจาะลึก
+
+เป้าหมายบทนี้คือทำให้การชี้ทิศด้วย R&S HE400 มีความน่าเชื่อถือ ไม่ใช่แค่หมุนเสาแล้วเลือกทิศที่ dBm สูงสุดครั้งเดียว
+
+R&S ระบุหลักการของ HE400 ตรง ๆ ว่าใช้ร่วมกับ receiver/analyzer เพื่อหา transmitter หรือ interference source โดย หมุนเสาและหาทิศที่ received signal strength สูงสุด และ HE400 ถูกออกแบบมาให้ทำงานร่วมกับ PR200 โดยเฉพาะ
+
+1. สิ่งแรกที่ต้องเข้าใจ: HE400 ไม่ใช่ Automatic DF
+
+HE400 ทำงานแบบ Manual Direction Finding / Homing
+
+หลักการคือ:
+
+Transmitter
+     ↓ RF
+
+          Main lobe
+             ↑
+        ┌─────────┐
+       /           \
+      /             \
+     [    HE400      ]
+            │
+          Operator
+            │
+           PR200
+
+คุณหมุน antenna แล้วดูว่า
+
+ทิศไหนมีระดับสัญญาณสูงที่สุด
+
+เช่น:
+
+Direction	Level
+North	-78 dBm
+NE	-68 dBm
+East	-53 dBm
+SE	-65 dBm
+South	-79 dBm
+
+เบื้องต้น candidate คือฝั่ง East
+
+แต่ยังไม่ควรประกาศว่า transmitter อยู่ East แน่นอน เพราะยังมี multipath, side lobe และ reflection
+
+2. HE400 มีหลาย Antenna Module
+
+นี่สำคัญมากกว่าที่ดูเหมือน
+
+HE400 เป็น antenna family ซึ่งประกอบด้วย handle และ antenna module สำหรับช่วงความถี่ต่างกัน ไม่ใช่เสาเดียวที่ทำงานเหมือนกันตั้งแต่ kHz ถึง GHz ทุกช่วง R&S ระบุว่าตระกูล HE400 ใช้งานร่วมกับโมดูลหลายชนิดเพื่อครอบคลุมงานตั้งแต่ย่านต่ำไปจนถึง microwave ตาม configuration
+
+ดังนั้นก่อนออกหา source:
+
+Frequency
+   ↓
+เลือก HE400 module
+   ↓
+ตรวจว่าครอบคลุม Frequency
+   ↓
+ต่อ PR200
+   ↓
+เริ่ม Homing
+
+ถ้าคุณกำลังหา 138 MHz
+
+คำถามแรกไม่ใช่:
+
+Bearing กี่องศา?
+
+แต่ต้องถามก่อนว่า:
+
+Antenna module ที่ต่ออยู่รองรับ 138 MHz หรือไม่
+
+3. วิธีถือ Antenna มีผลโดยตรง
+
+ถือ HE400 ให้ antenna อยู่ห่างจากร่างกายพอสมควรและพยายามรักษาท่าทางเดิมตลอดการ sweep
+
+เหตุผลคือร่างกายเราเองมีผลกับ RF
+
+โดยเฉพาะ VHF/UHF:
+
+       RF
+       ↓↓↓
+
+     Antenna
+        |
+        |
+       YOU
+
+ร่างกายสามารถ:
+
+absorb RF
+reflect RF
+ทำ antenna pattern เปลี่ยน
+
+ดังนั้นอย่าทำแบบนี้:
+
+วัด 0°   → ถือระดับอก
+วัด 90°  → ยกเหนือหัว
+วัด 180° → แนบตัว
+
+แล้วเอาค่ามาเปรียบเทียบกัน
+
+ให้รักษา:
+
+ความสูง
+orientation
+polarization
+ระยะจากตัว
+
+ให้ใกล้เคียงกัน
+
+4. Polarization — เรื่องที่คนมักมองข้าม
+
+RF signal มี polarization
+
+ที่พบทั่วไป:
+
+Vertical
+
+|
+|
+|
+
+และ Horizontal
+
+──────
+
+ถ้า transmitter เป็น Vertical แต่ receiving antenna orientation ไม่ตรงกัน ระดับที่วัดได้อาจลดลงอย่างมาก
+
+เพราะฉะนั้นถ้าหา source แล้ว level แปลก:
+
+ทำสองรอบ
+
+Sweep #1
+Vertical polarization
+
+Sweep #2
+Horizontal polarization
+
+แล้วเปรียบเทียบ
+
+5. ตัวอย่าง Polarization Test
+
+สมมติ 138.125 MHz
+
+Vertical
+North     -80
+East      -53
+South     -82
+West      -76
+Horizontal
+North     -87
+East      -71
+South     -88
+West      -83
+
+East ยังแรงที่สุดทั้งคู่ แต่ Vertical แรงกว่าชัด
+
+ข้อมูลนี้ทำให้ bearing น่าเชื่อถือขึ้น
+
+6. อย่าหา Bearing จาก Spectrum Peak เพียงครั้งเดียว
+
+วิธีที่ควรทำคือ Sweep → Peak → Reverse → Confirm
+
+ตัวอย่าง:
+
+Sweep clockwise
+0°
+↓
+45°
+↓
+90° = -52
+↓
+135°
+↓
+180°
+
+Peak ประมาณ:
+
+90°
+
+จากนั้นหมุนย้อน
+
+135°
+↓
+110°
+↓
+95°
+↓
+80°
+↓
+60°
+
+ถ้า peak รอบกลับประมาณ:
+
+92°
+
+ถือว่าน่าสนใจ
+
+ค่า bearing ใช้งานอาจประมาณ:
+
+~91°
+
+ไม่ใช่เห็นครั้งแรก 90° แล้วเดินทันที
+
+7. เทคนิค Sector Search
+
+ตอนเริ่มอย่าพยายามหา 1° accuracy
+
+รอบแรกแบ่งเป็น sector ก่อน:
+
+        N
+        0°
+        ↑
+
+315°         45°
+
+W 270°       90° E
+
+225°         135°
+
+        ↓
+       180°
+        S
+
+หาแค่:
+
+East sector = 60–120°
+
+ก่อน
+
+จากนั้นค่อย scan ละเอียด:
+
+70
+80
+90
+100
+110°
+
+เร็วและน่าเชื่อถือกว่า
+
+8. Main Lobe / Side Lobe / Back Lobe
+
+นี่คือหัวใจของ directional antenna
+
+pattern แบบง่าย:
+
+                 MAIN LOBE
+                    ↑
+                  /   \
+                /       \
+              /           \
+        -----               -----
+
+           \                 /
+            \               /
+              BACK LOBE
+
+แต่จริง ๆ ยังมี side lobes
+
+ดังนั้นสมมติอ่านได้:
+
+40°   -64 dBm
+90°   -51 dBm   ← strongest
+150°  -66 dBm
+270°  -61 dBm
+
+อย่าคิดว่ามี source 4 ตัว
+
+อาจเป็น antenna pattern ของ source เดียว
+
+9. วิธีแยก Front กับ Back
+
+สมมติ:
+
+90°  = -53 dBm
+270° = -59 dBm
+
+ต่างกันแค่ 6 dB
+
+ยังไม่ควรมั่นใจสูงมาก
+
+วิธีที่ดีกว่าคือ:
+
+ย้ายจุด
+
+เช่น 20–50 m แล้ววัดใหม่
+
+ถ้า source อยู่ East จริง:
+
+Position A
+East > West
+
+Position B
+East > West
+
+Position C
+East > West
+
+ความเชื่อมั่นเพิ่มขึ้นมาก
+
+10. Level Tone ของ PR200
+
+PR200 มี built-in Tone สำหรับ manual homing โดย pitch หรือ pulse rate จะเปลี่ยนตาม received signal level และออกทาง speaker/headset ช่วยให้ผู้ใช้มองไปที่พื้นที่จริงแทนการจ้องจอ
+
+แนวคิด:
+
+Weak RF
+beep ... beep ...
+
+↓ เข้าใกล้ / หันถูกทิศ
+
+beep..beep..beep
+
+↓
+
+Strong
+beep-beep-beep-beep
+
+รายละเอียดลักษณะ tone อาจแตกต่างตาม setting/firmware แต่หลักคือ ใช้เสียงแทน indication ของ level
+
+11. ทำไม Tone มีประโยชน์มากกว่าอ่าน dBm บางสถานการณ์
+
+สมมติคุณเดินอยู่ในโรงงาน
+
+ถ้าจ้อง PR200:
+
+-71
+-68
+-64
+-60
+
+คุณต้องเดินและอ่านจอพร้อมกัน
+
+แต่ Tone ทำให้ใช้:
+
+ตา → ดูเส้นทาง / source candidate
+หู → monitor RF level
+มือ → หมุน HE400
+
+ใช้งานภาคสนามคล่องกว่ามาก
+
+12. ถ้า Signal เป็น Burst ให้ใช้ Peak Detector
+
+ตัวอย่าง transmitter:
+
+OFF OFF OFF
+██
+OFF OFF
+██
+OFF OFF OFF
+
+ถ้าใช้ average มากเกินไประดับอาจดูต่ำและ fluctuation สูง
+
+สำหรับงาน hunting signal แบบ pulse/burst สามารถใช้:
+
+Detector = Peak
+
+และใช้ Max Hold/Waterfall ช่วยก่อนล็อก candidate
+
+13. แต่ต้องระวัง Tone กับ Burst
+
+ถ้าสัญญาณออก:
+
+100 ms ทุก 10 s
+
+คุณจะหมุน antenna แล้วเปรียบเทียบ level ยาก
+
+เพราะ:
+
+ตำแหน่ง A
+signal ON
+
+ตำแหน่ง B
+signal OFF
+
+A จะดูแรงกว่า ทั้งที่ไม่เกี่ยวกับ direction
+
+วิธีที่ดีกว่า:
+
+Waterfall
+↓
+หารูปแบบ burst
+↓
+รู้ period
+↓
+วัดหลาย cycle
+↓
+เปรียบเทียบ Peak
+14. ตั้ง Receiver ก่อนทำ Homing
+
+ตัวอย่าง candidate:
+
+Frequency = 138.125 MHz
+BW ≈ 12 kHz
+
+ตั้ง Receiver ประมาณ:
+
+Center frequency = 138.125 MHz
+
+Span = 50–200 kHz
+Resolution = เหมาะกับ signal
+Demod BW = ครอบ signal
+Detector = Peak ถ้า burst
+Tone = ON
+ATT = ปรับตามระดับ
+
+สิ่งสำคัญคืออย่าใช้ bandwidth กว้างเกินจำเป็น
+
+15. ทำไม Bandwidth แคบช่วย Homing
+
+สมมติ:
+
+138.100   Wanted
+138.125   Interference
+138.150   Strong radio
+
+ถ้า receiver bandwidth กว้าง:
+
+|---------------------------|
+138.100 138.125     138.150
+
+level ที่อ่านอาจมี contribution จากหลาย signal
+
+แต่ถ้าเลือก BW ให้เหมาะ:
+
+       |----|
+      138.125
+
+level response จะสัมพันธ์กับ candidate มากกว่า
+
+16. Homing ขั้นที่ 1 — Far Field
+
+เมื่อ source ยังไกล:
+
+Level = -90 ถึง -70 dBm
+
+เป้าหมายคือ sensitivity
+
+ใช้:
+
+ATT ต่ำ
+↓
+Gain เหมาะสม
+↓
+Directional antenna
+
+หา sector ก่อน
+
+เช่น:
+
+N  -85
+E  -72  ←
+S  -88
+W  -91
+
+เดินไป East
+
+17. Homing ขั้นที่ 2 — Medium Range
+
+ระดับเริ่มขึ้น:
+
+-70
+↓
+-60
+↓
+-50 dBm
+
+ตอนนี้ direction จะหาได้ง่ายขึ้น
+
+ใช้:
+
+30–45° sweep
+
+รอบทิศที่สงสัย
+
+เช่น:
+
+60°  -58
+70°  -54
+80°  -48
+90°  -45 ←
+100° -49
+110° -56
+
+ประมาณ direction:
+
+90°
+
+18. Homing ขั้นที่ 3 — Near Source
+
+พอได้:
+
+-40
+-30 dBm
+
+อย่าเน้น sensitivity อีก
+
+ต้องทำตรงข้าม:
+
+ลด sensitivity
+
+เพิ่ม ATT
+
+0
+↓
+10
+↓
+20
+↓
+30 dB
+
+ตามความเหมาะสม
+
+19. ทำไมต้องลด Sensitivity
+
+สมมติไม่มี ATT:
+
+North -30
+East  -27
+South -31
+West  -29
+
+ต่างกันนิดเดียว
+
+แทบหาทิศไม่ได้
+
+หลังปรับ measurement range ให้เหมาะ อาจเห็น contrast ชัดขึ้นในเชิง homing:
+
+North -58
+East  -43   ←
+South -61
+West  -57
+
+จึงแยก direction ได้ง่ายกว่า
+
+หมายเหตุ: ตัวเลขเป็นตัวอย่างอธิบายหลัก ไม่ใช่การรับประกันว่าการเพิ่ม ATT จะสร้างค่าชุดนี้พอดี
+
+20. เทคนิค “เดินผ่าน Source”
+
+อีกวิธีที่มีประโยชน์มาก
+
+สมมติคุณสงสัย corridor:
+
+A → B → C → D → E
+
+วัด:
+
+A -75
+B -63
+C -48
+D -57
+E -70
+
+ระดับสูงสุดอยู่ C
+
+ดังนั้น source น่าจะใกล้ C
+
+แทนที่จะดู direction อย่างเดียว
+
+นี่เรียกว่าใช้ spatial level gradient
+
+21. Indoor Hunting ต้องเปลี่ยนวิธีคิด
+
+Outdoor:
+
+Bearing มีความสำคัญสูง
+
+Indoor:
+
+Relative Level + Movement มักสำคัญขึ้น
+
+เพราะ multipath หนักมาก
+
+ตัวอย่างในห้อง:
+
+TX
+ |
+ | direct
+ ↓
+あなた
+
+TX → Wall → Reflection → คุณ
+
+TX → Metal cabinet → คุณ
+
+บางครั้ง reflection แรงกว่าทางตรงด้วย
+
+22. วิธีทำ Indoor Search ที่มีประสิทธิภาพ
+
+ใช้ hierarchy:
+
+Building
+   ↓
+Floor
+   ↓
+Zone
+   ↓
+Room
+   ↓
+Rack
+   ↓
+Equipment
+   ↓
+Cable / Module
+
+อย่าพยายามหา device ตั้งแต่เดินเข้าตึก
+
+23. ตัวอย่างจริง
+หา Floor
+Floor 1   -82
+Floor 2   -76
+Floor 3   -61
+Floor 4   -45 ←
+Floor 5   -60
+
+ไป Floor 4
+
+หา Zone
+West    -68
+Center  -53
+East    -41 ←
+
+ไป East
+
+หา Room
+Room 401  -58
+Room 402  -39 ←
+Room 403  -55
+
+ไป 402
+
+หา Rack
+Rack A -55
+Rack B -43
+Rack C -27 ←
+
+เหลือ Rack C
+
+24. Multipath Test ที่ควรจำ
+
+สมมติได้ direction:
+
+Point A
+80°
+
+ขยับด้านข้าง 10–20 m:
+
+Point B
+230°
+
+ต่างกันมหาศาล
+
+อย่าเฉลี่ยว่า:
+
+(80 + 230)/2
+
+ไม่มีความหมาย
+
+ให้สงสัย multipath
+
+ย้ายอีกจุด
+
+Point C
+75°
+
+ตอนนี้:
+
+A = 80
+B = 230
+C = 75
+
+B มีแนวโน้มเป็น reflection/outlier
+
+25. เทคนิค 3-Point Bearing
+
+ใช้จุดที่มี separation พอสมควร:
+
+A            B
+ \          /
+  \        /
+   \      /
+    \    /
+      X
+      |
+      |
+      C
+
+เก็บ:
+
+A → 100°
+B → 210°
+C → 20°
+
+แล้วดูว่าทิศตัดกันบริเวณไหน
+
+การวัดจากหลายตำแหน่งช่วยประมาณตำแหน่ง source ได้ดีกว่าการวัดจุดเดียว แนวคิด triangulation แบบ manual DF นี้เป็นวิธีที่ R&S ใช้ในระบบ portable monitoring เช่นกัน
+
+26. อย่าเลือก Measurement Point แบบนี้
+
+หลีกเลี่ยง:
+
+ติดกำแพง
+ติดรถ
+ใต้เสาเหล็ก
+ข้าง transformer
+ใต้ transmission line
+ติด rack
+
+ถ้าเลือกได้
+
+ให้ใช้:
+
+พื้นที่เปิด
+ห่างวัตถุโลหะขนาดใหญ่
+มี line-of-sight มากขึ้น
+
+เพื่อให้ bearing เสถียรขึ้น
+
+27. FM Band ทำไมมักปวดหัว
+
+VHF เช่น FM broadcast:
+
+88–108 MHz
+
+wavelength ยาวประมาณหลายเมตร
+
+ตัวอย่างที่ 100 MHz:
+
+$$ \lambda = \frac{c}{f} $$ $$ \lambda \approx \frac{3\times10^8}{100\times10^6} $$ $$ \lambda \approx 3\,m $$
+
+ดังนั้นอาคาร รถ เสาเหล็ก และพื้นผิวขนาดใหญ่สามารถสร้าง reflection ที่มีนัยสำคัญได้ง่าย
+
+นี่เป็นเหตุผลหนึ่งว่าทำไม FM DF ในพื้นที่สิ่งปลูกสร้างหนาแน่นอาจไม่นิ่ง
+
+28. เปรียบเทียบกับ 530 MHz
+
+ที่ 530 MHz:
+
+$$ \lambda \approx 0.57\,m $$
+
+propagation/multipath pattern ต่างจาก 100 MHz อย่างมาก
+
+ดังนั้นกรณีที่:
+
+530 MHz DF stable
+
+แต่
+
+100 MHz DF unstable
+
+ไม่ได้พิสูจน์ว่า hardware ปกติหรือเสียทั้งหมด
+
+แต่เป็นหลักฐานสำคัญที่ทำให้ต้องตรวจ:
+
+antenna response
+polarization
+environment
+strong-signal overload
+multipath
+cable/path configuration
+
+แยกตาม band
+
+29. อีกเทคนิค: ลองเปลี่ยนตำแหน่งมากกว่าหมุนอยู่จุดเดิม
+
+ถ้า bearing แกว่ง:
+
+ผิด:
+
+วัดอยู่จุดเดิม 20 ครั้ง
+
+มักไม่ได้ข้อมูลใหม่มาก
+
+ดีกว่า:
+
+Point A
+↓ 20 m
+Point B
+↓ 20 m
+Point C
+
+เพราะคุณเปลี่ยน multipath geometry
+
+นี่มักให้ข้อมูลมากกว่า
+
+30. Smartphone App
+
+PR200 ยังรองรับ mobile app สำหรับช่วย homing โดย smartphone สามารถติดกับ antenna handle และใช้ควบคุม/ดู spectrum ของ PR200 ผ่าน WLAN ได้ ทำให้ operator สนใจเส้นทางและ antenna มากขึ้น
+
+แนวทางคือ:
+
+HE400
+ │
+ ├── Smartphone
+ │     Spectrum
+ │     Level
+ │
+ └── PR200
+
+เหมาะมากเวลาเดิน hunt ระยะไกล
+
+31. วิธีแยก “Signal Level Peak” กับ Source จริง
+
+ต้องมีอย่างน้อย 3 evidence:
+
+Evidence 1 — Direction
+HE400 → East
+Evidence 2 — Spatial Gradient
+
+เดิน East:
+
+-75
+-65
+-55
+-43
+
+แรงขึ้น
+
+Evidence 3 — Repeatability
+
+เปลี่ยนตำแหน่งแล้ว direction ยัง converge ไปพื้นที่เดียวกัน
+
+ถ้าครบ 3 อย่าง ความมั่นใจสูงขึ้นมาก
+
+32. Error ที่เจอบ่อยที่สุด
+Error	ผล
+ใช้ antenna module ผิด band	Bearing/Level ไม่น่าเชื่อถือ
+Polarization ผิด	Signal ลด
+หมุนเร็วเกิน	หา peak ไม่เจอ
+เชื่อ bearing จุดเดียว	โดน multipath หลอก
+Gain สูงตลอด	เข้าใกล้แล้ว direction หาย
+BW กว้างเกิน	วัด signal อื่นรวม
+อยู่ข้างโลหะ	Reflection สูง
+ไล่ peak โดยไม่ verify frequency	ตาม source ผิดตัว
+เชื่อ signal แรงที่สุด	อาจเป็น wanted transmitter
+ไม่ทำ ATT test	อาจตาม intermod artifact
+33. Workflow มืออาชีพสำหรับ HE400
+
+จำ sequence นี้:
+
+Candidate Frequency
+        ↓
+Check antenna module
+        ↓
+Set Receiver BW
+        ↓
+ATT/Gain appropriate
+        ↓
+Correct polarization
+        ↓
+360° coarse sweep
+        ↓
+Find sector
+        ↓
+Fine sweep
+        ↓
+Reverse sweep
+        ↓
+Confirm bearing
+        ↓
+Move position
+        ↓
+Repeat
+        ↓
+Bearing convergence
+        ↓
+Walk toward source
+        ↓
+Signal ↑
+        ↓
+ATT ↑
+        ↓
+Building
+ → Floor
+ → Room
+ → Rack
+ → Device
+34. แบบฝึกหน้างานสำหรับบทนี้
+
+ใช้ transmitter/test source ที่ได้รับอนุญาตและรู้ตำแหน่งอยู่แล้วหนึ่งตัว เพื่อเช็ก technique ของเราเอง
+
+อย่าให้คนถือเครื่องรู้ตำแหน่ง source ตอนเริ่ม ถ้าทำได้
+
+จุด A:
+
+Frequency =
+Antenna module =
+Polarization =
+
+0° =
+45° =
+90° =
+135° =
+180° =
+225° =
+270° =
+315° =
+
+Estimated bearing =
+
+เดินไป Point B:
+
+Estimated bearing =
+
+Point C:
+
+Estimated bearing =
+
+แล้วค่อยเปิดตำแหน่งจริง
+
+วัด error:
+
+Bearing estimated = 83°
+True direction     = 91°
+
+Error = 8°
+
+นี่เป็นการฝึกที่มีประโยชน์มาก เพราะทำให้รู้ว่า operator + antenna + environment ของเราเองให้ repeatability เท่าไร
+
+เทคนิคสำหรับงาน 138 MHz ของคุณโดยเฉพาะ
+
+ถ้าเป็นกรณี Monitoring 138 MHz รับได้ แต่ DF/Homing มีปัญหา ผมจะเก็บข้อมูลเป็น matrix นี้:
+
+Test	138 MHz	Reference เช่น 530 MHz
+Omnidirectional level		
+HE400 peak level		
+ATT 0		
+ATT +10		
+ATT +20		
+Vertical polarization		
+Horizontal polarization		
+Bearing Point A		
+Bearing Point B		
+Bearing Point C		
+Bearing stability		
+
+ถ้า 530 MHz stable แต่ 138 MHz unstable ตารางนี้จะช่วยแยกได้ว่าเป็น band-specific RF/environment issue หรือมีแนวโน้มเกี่ยวกับ antenna/receiver path มากกว่าเดิม แทนที่จะสรุปจากการทดสอบครั้งเดียว.
+
+สรุปบท 4
+
+หลักที่อยากให้จำที่สุดมีแค่:
+
+Far away → เน้น sensitivity
+Near source → เพิ่ม attenuation
+หนึ่ง bearing = ยังไม่พอ
+ย้ายตำแหน่งเพื่อเอาชนะ multipath
+Direction + Level Gradient + Repeatability = หลักฐานที่ดี
+
+บทที่ 5 ควรต่อด้วย PR200 Advanced Signal Analysis: Spectrum → Waterfall → Max Hold → Min Hold → Average → Detector → Occupied Bandwidth → Channel Power → Modulation → Zero Span แล้วผมจะสอนวิธี “อ่านรูปร่างของ signal” ว่าอะไรเป็น FM/AM/digital/burst/pulse/noise/harmonic/intermod/spurious และวิธีแยก สัญญาณจริงกับ self-generated interference ให้เป็นขั้นตอนครับ
+
+บทที่ 5 ต่อ
+บทที่ 5 — Advanced Signal Analysis: อ่านสัญญาณให้ออกด้วย PR200
+
+บทนี้เป้าหมายไม่ใช่แค่ “เห็นว่ามีสัญญาณ” แต่ให้ตอบได้ว่า
+
+มันคือสัญญาณประเภทไหน → กว้างเท่าไร → กำลังเท่าไร → เกิดตอนไหน → มีพฤติกรรมอย่างไร → เป็น signal จริง, harmonic, intermod หรือ artifact
+
+PR200 มี option สำหรับงานนี้ค่อนข้างครบ เช่น CS-SPM สำหรับ Occupied Bandwidth/Channel Power, CS-MM สำหรับ analog modulation measurement, CS-ZS สำหรับ time-domain analysis และรุ่นปัจจุบันยังมี CS-IA สำหรับตรวจ harmonic/intermodulation อัตโนมัติด้วย
+
+1. เครื่องมือวิเคราะห์ที่ต้องแยกให้ออกก่อน
+
+คิดเป็น 2 โลก
+
+Frequency Domain
+━━━━━━━━━━━━━━━━━
+Spectrum
+Waterfall
+Max Hold
+Average
+OBW
+Channel Power
+
+        VS
+
+Time Domain
+━━━━━━━━━━━━━━━━━
+Zero Span
+Pulse/Burst timing
+ON/OFF duration
+Period
+Duty cycle
+
+Spectrum ตอบว่า “พลังงานอยู่ที่ความถี่ไหน”
+
+Time Domain ตอบว่า “มันเกิดเมื่อไรและนานเท่าไร”
+
+การวิเคราะห์ interference ที่ดีมักต้องใช้ทั้งสอง
+
+2. เริ่มจาก Spectrum Shape
+
+สมมติ tune ไปที่
+
+138.125 MHz
+
+แล้วเห็น:
+
+Level
+ ↑
+
+          ╭───╮
+         /     \
+________/       \________
+       138.125 MHz
+
+อย่าเพิ่งสรุปว่าเป็น FM หรือ digital จากรูปร่างครั้งเดียว
+
+ให้ตรวจ:
+
+Center frequency
+Bandwidth
+symmetry
+sidebands
+level
+timing
+modulation
+neighboring channels
+3. รูปร่าง Carrier ธรรมดา
+
+สัญญาณ CW หรือ carrier แคบมากจะประมาณ:
+
+       │
+       │
+_______│_______
+       ↑
+
+ในเครื่องจริงจะไม่เป็นเส้น infinitesimal เพราะ RBW มีความกว้าง
+
+ถ้าลด RBW:
+
+RBW ใหญ่
+
+       /\
+______/  \______
+
+
+RBW เล็ก
+
+        │
+_______/ \_______
+
+peak จะดูแคบและแยกจากสิ่งรอบข้างได้ดีขึ้น
+
+4. AM แบบพื้นฐาน
+
+AM signal ในอุดมคติจะมี:
+
+LSB     Carrier      USB
+
+ |         |          |
+ |         |          |
+_|_________|__________|_
+
+ถ้า modulation tone เดียว:
+
+$$ f_c-f_m,\quad f_c,\quad f_c+f_m $$
+
+ตัวอย่าง carrier 100 MHz modulate ด้วย 1 kHz:
+
+99.999 MHz
+100.000 MHz
+100.001 MHz
+
+แต่ voice จริงมีหลาย frequency จึงเห็นเป็น sideband ที่กว้างกว่าเส้นเดียว
+
+5. FM แตกต่างจาก AM
+
+FM ไม่มีรูปร่างง่ายแบบ carrier + sideband คู่เดียวเมื่อ modulation ซับซ้อน
+
+สิ่งที่เรามักเห็นคือ:
+
+            ╭──────╮
+          /          \
+_________/            \_________
+
+และ bandwidth เปลี่ยนตาม deviation/modulation
+
+ดังนั้น อย่าดู shape แล้วบอกว่า FM แน่นอน
+
+ใช้:
+
+Spectrum
++
+Bandwidth
++
+Demodulation
++
+CS-MM ถ้ามี
+
+ประกอบกัน
+
+PR200 มี CS-MM Modulation Measurement สำหรับ measurement ของ analog modulation ตามแนวทาง ITU
+
+6. Digital Signal
+
+Digital signal หลายชนิดอาจมีลักษณะคล้ายก้อน:
+
+        ┌───────────┐
+       /             \
+______/               \______
+
+หรือมี structure ภายใน:
+
+    ||||||||||||||||||
+____||||||||||||||||||____
+
+แต่รูปร่างขึ้นกับ modulation/filtering อย่างมาก
+
+เช่น:
+
+PSK
+QAM
+FSK
+OFDM
+proprietary digital modulation
+
+ดังนั้นจาก spectrum อย่างเดียว มักตอบได้เพียง:
+
+“มีลักษณะ broadband/digital-like”
+
+ยังไม่ควรระบุ modulation แบบฟันธง
+
+7. Noise-like Signal
+
+ถ้า noise floor ยกขึ้นเป็นบริเวณ:
+
+          ███████████
+          ███████████
+__________███████████__________
+
+ให้สงสัย:
+
+broadband noise
+switching noise
+digital emission
+receiver overload
+EMI
+
+ก่อนจะบอกว่าเป็น transmitter
+
+8. Waterfall ใช้แยกพฤติกรรม
+
+Spectrum snapshot นี้:
+
+        /\
+_______/  \_______
+
+อาจเป็นได้ทั้ง continuous หรือ burst
+
+Waterfall จะตอบให้:
+
+Continuous
+Frequency →
+
+       █
+       █
+       █
+       █
+       █
+Time ↓
+Burst
+       █
+
+       █
+
+       █
+Frequency hopping
+ █
+      █
+           █
+   █
+             █
+Sweeping signal
+█
+  █
+    █
+      █
+        █
+
+แค่นี้ก็แยก behavior ได้เยอะมากแล้ว
+
+9. Normal Trace
+
+Normal หรือ Clear/Write แสดงสถานะปัจจุบัน
+
+เหมาะสำหรับ:
+
+continuous signal
+tuning
+bandwidth adjustment
+ดู spectrum real-time
+
+แต่ข้อเสีย:
+
+signal ที่โผล่เร็วมากอาจพลาด
+
+10. Max Hold
+
+Max Hold เก็บค่าสูงสุดของแต่ละ frequency bin
+
+สมมติ 3 วินาที:
+
+Time 1
+
+      /\
+_____/  \________
+
+
+Time 2
+
+              /\
+_____________/  \__
+
+
+Time 3
+
+   /\
+__/  \_____________
+
+Max Hold จะสะสมเป็น:
+
+   /\   /\       /\
+__/  \_/  \_____/  \__
+
+เหมาะมากกับ:
+
+intermittent interference
+burst
+hopping
+sporadic emission
+scan survey
+11. ข้อควรระวัง Max Hold
+
+Max Hold ไม่ได้แปลว่า
+
+signal ทั้งหมดเหล่านี้เกิดพร้อมกัน
+
+มันคือ:
+
+frequency ไหนเคยมี peak สูงสุดเท่าไรตลอดช่วงเวลาที่เราเก็บ
+
+ดังนั้นต้องใช้คู่กับ Waterfall
+
+12. Average Trace
+
+Average ช่วยลด variation
+
+ตัวอย่าง noise:
+
+/\/\/\/\/\/\/\/\/\/\
+
+หลัง averaging:
+
+~~~~~~~~~~~~~~~~~~~~
+
+เหมาะกับ:
+
+continuous digital signal
+noise measurement
+ดู average behavior
+ลด trace jitter
+
+แต่ไม่ดีสำหรับหา pulse ที่เกิดเร็วและหาย
+
+เพราะ average อาจกลบมัน
+
+13. Peak Detector กับ Trace Max Hold คนละอย่าง
+
+จุดนี้คนสับสนเยอะ
+
+Detector
+
+กำหนดว่าในแต่ละ measurement interval จะเอาค่าอะไร
+
+เช่น:
+
+Peak
+RMS
+Average
+Trace Mode
+
+กำหนดว่าจะเก็บค่าระหว่างหลาย trace อย่างไร
+
+เช่น:
+
+Normal
+Max Hold
+Average
+
+จึงสามารถใช้:
+
+Peak detector + Max Hold trace
+
+พร้อมกันได้
+
+เหมาะกับ intermittent interference
+
+14. Peak Detector
+
+Peak Detector สนใจค่าที่สูงสุดใน measurement interval
+
+เหมาะกับ:
+
+Pulse
+Burst
+Intermittent signal
+
+ตัวอย่าง:
+
+Signal
+
+       █
+_______█____________
+
+Peak detector มีโอกาสเก็บ event นี้ได้ดีกว่าค่าเฉลี่ย
+
+15. RMS Detector
+
+RMS เกี่ยวข้องกับกำลังเฉลี่ยเชิงพลังงานของ signal
+
+เหมาะกับ:
+
+digital modulation
+noise-like signals
+channel power measurement
+
+เช่น OFDM signal ที่ power กระจายกว้าง
+
+การใช้ Peak อย่างเดียวอาจไม่ได้ represent power ของ channel ที่ดี
+
+16. Occupied Bandwidth — OBW
+
+นี่คือ function ที่ผมอยากให้คุณใช้เป็น
+
+PR200 option CS-SPM วัด:
+
+Occupied bandwidth
+bandwidth center offset
+channel power
+
+และ R&S ระบุว่ามีวิธีวัด bandwidth ทั้ง x dB และ β % พร้อมอ้างอิง ITU-R SM.328 และ SM.443
+
+OBW คืออะไร
+
+คิดง่าย ๆ:
+
+ความกว้าง frequency ที่บรรจุกำลังส่วนใหญ่ของ signal
+
+สมมติ:
+
+Power
+
+        ╭────────╮
+      /            \
+_____/              \_____
+
+     |<--- OBW --->|
+
+ถ้าเครื่องรายงาน:
+
+OBW = 14.8 kHz
+
+จะดีกว่าพูดด้วยตาว่า:
+
+“ประมาณ 15 kHz”
+
+โดยเฉพาะงานตรวจรับ
+
+17. β% Method
+
+ตัวอย่างใช้ 99% power:
+
+$$ OBW_{99\%} $$
+
+หมายถึง bandwidth ที่ครอบคลุมประมาณ 99% ของ integrated signal power ตามวิธี measurement ที่กำหนด
+
+แนวคิด:
+
+Total signal power = 100%
+
+นอกซ้าย 0.5%
+|<----- 99% ----->|
+                  นอกขวา 0.5%
+
+นี่เป็นวิธีที่เหมาะกว่า eyeballing สำหรับ measurement formal
+
+18. x-dB Bandwidth
+
+อีกวิธีหนึ่งวัดจุดที่ amplitude ลดลงจาก peak ตามจำนวน dB ที่กำหนด
+
+เช่นแนวคิด:
+
+Peak
+  ↑
+  │       ______
+  │     /        \
+- x dB ─•──────────•─
+       ↑            ↑
+      f1            f2
+
+BW = f2 - f1
+
+เหมาะกับ signal บางประเภท
+
+ต้องเลือก method ตามข้อกำหนดงาน ไม่ใช่เลือกตามสะดวกอย่างเดียว
+
+19. Channel Power
+
+CS-SPM ยังวัด Channel Power ได้โดยรวม power ภายใน bandwidth ที่กำหนด
+
+เช่น:
+
+       Signal
+      ████████
+
+ |<--- Channel --->|
+
+เครื่อง integrate power ทั้ง channel
+
+สมมติได้:
+
+Channel Power = -53.2 dBm
+
+มันต่างจากการอ่าน Marker Peak:
+
+Marker Peak = -61 dBm
+
+เพราะ Peak เป็นค่าที่ frequency bin หนึ่ง
+
+แต่ Channel Power รวมพลังงานทั้ง bandwidth
+
+20. ตัวอย่างสำคัญ
+
+Digital signal กว้าง 1 MHz:
+
+████████████████████████
+
+แต่ละ bin อาจ:
+
+-75 dBm
+
+แต่เมื่อรวมทั้ง channel:
+
+Channel Power
+
+ย่อมมากกว่ากำลังใน bin เดียว
+
+ดังนั้นอย่าเอา:
+
+Marker amplitude
+
+ไปแทน
+
+Channel power
+
+21. Center Offset
+
+CS-SPM วัด bandwidth center offset ได้ด้วย
+
+สมมติ nominal frequency:
+
+138.000000 MHz
+
+แต่ measured center:
+
+138.002000 MHz
+
+Offset:
+
+$$ +2\text{ kHz} $$
+
+มีประโยชน์กับ:
+
+transmitter verification
+frequency accuracy
+checking mis-tuned transmitter
+
+แต่ถ้าจะวัด frequency accuracy จริงจัง ต้องคำนึงถึง reference accuracy ของ receiver ด้วย
+
+22. Zero Span — เปลี่ยนแกน X จาก Frequency เป็น Time
+
+ปกติ:
+
+X = Frequency
+Y = Level
+
+Zero Span / Time-domain:
+
+X = Time
+Y = Level
+
+PR200 มี CS-ZS สำหรับ simultaneous frequency/time-domain analysis
+
+23. Burst Signal ใน Zero Span
+
+สมมติ signal:
+
+Power
+ ↑
+      ┌────┐
+______│    │______________
+                      Time →
+
+วัดได้:
+
+ON time = 20 ms
+
+ถ้าเกิดทุก:
+
+100 ms
+
+Period:
+
+$$ T = 100\,ms $$
+
+Duty cycle โดยประมาณ:
+
+$$ D=\frac{20}{100}\times100 $$ $$ D=20\% $$
+
+นี่คือข้อมูลที่ Spectrum อย่างเดียวให้ไม่ได้
+
+24. Zero Span ใช้หาอะไรได้บ้าง
+
+เหมาะมากกับ:
+
+burst duration
+pulse repetition
+transmitter ON/OFF
+duty cycle
+TDD timing
+intermittent interference
+control/telemetry behavior
+
+โดยเฉพาะกรณี:
+
+“เครื่องมีปัญหาทุก ๆ 5 วินาที”
+
+Zero Span ช่วยยืนยันว่า interference มี period 5 วินาทีจริงหรือไม่
+
+25. Spectrum + Zero Span ทำงานร่วมกัน
+
+Workflow ที่ถูก:
+
+Spectrum
+↓
+138.125 MHz candidate
+↓
+กำหนด receiver bandwidth
+↓
+Zero Span
+↓
+ดู amplitude vs time
+
+ไม่ใช่เปิด Zero Span กว้าง ๆ โดยยังไม่รู้ว่าจะวัด frequency ไหน
+
+26. Harmonic คืออะไร
+
+ถ้า fundamental:
+
+$$ f_0 = 100\,MHz $$
+
+harmonic อาจเกิดที่:
+
+$$ 2f_0 = 200\,MHz $$ $$ 3f_0 = 300\,MHz $$ $$ 4f_0 = 400\,MHz $$
+
+ดังนั้นเห็น:
+
+100 MHz  ██████
+200 MHz  ███
+300 MHz  ██
+400 MHz  █
+
+เป็น pattern ที่ควรสงสัย harmonic
+
+แต่ยังต้อง verify
+
+27. เทคนิคพิสูจน์ Harmonic
+
+ดูว่า signal ทั้งหมดมี:
+
+timing เดียวกัน
+modulation behavior สัมพันธ์กัน
+frequency relation เป็นจำนวนเต็ม
+level ลดลงตาม harmonic order โดยทั่วไป
+
+เช่น:
+
+100 MHz ON
+200 MHz ON
+300 MHz ON
+
+100 MHz OFF
+200 MHz OFF
+300 MHz OFF
+
+ความสัมพันธ์นี้แข็งแรงกว่าดู frequency ratio อย่างเดียว
+
+28. Intermodulation — สำคัญมากในไซต์ที่มี RF เยอะ
+
+ถ้ามี transmitter:
+
+$$ f_1 $$
+
+และ
+
+$$ f_2 $$
+
+nonlinear device สามารถสร้าง products เช่น:
+
+$$ f_1+f_2 $$ $$ f_2-f_1 $$
+
+และ third-order:
+
+$$ 2f_1-f_2 $$ $$ 2f_2-f_1 $$
+
+ตัวอย่าง:
+
+$$ f_1=150\,MHz $$ $$ f_2=160\,MHz $$
+
+จะได้ possible third-order product:
+
+$$ 2(150)-160=140\,MHz $$
+
+และ
+
+$$ 2(160)-150=170\,MHz $$
+
+ดังนั้นหากพบ unexpected signal ที่ 140 หรือ 170 MHz ก็มีเหตุผลให้ตรวจ intermod ต่อ
+
+29. แต่ Intermod มีสองแหล่ง
+
+ต้องแยกให้ได้:
+
+External intermodulation
+
+เกิดจริงในระบบภายนอก เช่น nonlinear junction/device
+
+Receiver-generated intermodulation
+
+เกิดใน front-end ของ PR200 เพราะ RF input แรงเกินไป
+
+วิธีแยกที่ง่ายที่สุด:
+
+ATT Test
+
+30. ตัวอย่าง Receiver Intermod
+
+เจอ:
+
+150 MHz strong
+160 MHz strong
+
+และ
+
+140 MHz suspicious
+170 MHz suspicious
+
+เพิ่ม ATT 10–20 dB
+
+ถ้า:
+
+150 / 160 ยังอยู่
+
+แต่
+
+140 / 170 หายอย่างรวดเร็ว
+
+ให้สงสัย receiver-generated intermod มากขึ้น
+
+นี่คือเหตุผลว่า อย่าออกไปไล่หา 140 MHz ก่อนทำ ATT test
+
+31. Spurious Emission
+
+Spurious คือ unwanted emission นอก emission ที่ตั้งใจส่ง ซึ่งอาจมาจาก:
+
+transmitter circuitry
+clock
+mixer
+synthesizer
+amplifier
+switching circuitry
+
+รูปร่างไม่มี pattern ตายตัว
+
+สิ่งที่ต้องหา:
+
+ความสัมพันธ์กับอุปกรณ์ต้นทาง
++
+ON/OFF correlation
++
+frequency relation
++
+spatial correlation
+32. Self-generated Interference
+
+สำคัญมากใน Monitoring Station
+
+บางครั้งสิ่งที่ PR200 เห็นอาจมาจากอุปกรณ์ใกล้ตัว เช่น:
+
+Laptop
+Display
+USB
+Ethernet
+Switching PSU
+DC/DC
+Network equipment
+
+วิธีคิด:
+
+พบ signal
+↓
+เดิน antenna
+↓
+signal แรงขึ้นใกล้ rack
+↓
+ใกล้ PSU แรงมาก
+↓
+ทดสอบตาม procedure ที่ได้รับอนุญาต
+↓
+correlation
+33. เทคนิค Antenna Disconnect Test
+
+ในบางกรณีเพื่อแยก external RF จาก internal receiver artifact สามารถใช้การทดสอบ input อย่างถูกต้องตาม procedure ของอุปกรณ์ เช่นเปรียบเทียบกับ terminated input ที่เหมาะสม
+
+แนวคิดคือ:
+
+Antenna connected
+Signal present
+
+เทียบกับ
+
+Controlled/terminated input
+
+ถ้า signal ยังปรากฏเหมือนเดิม อาจต้องสงสัย internal path/receiver artifact มากขึ้น
+
+อย่าต่อหรือถอด RF input ที่มีโอกาสมีกำลังสูงโดยไม่ทราบระดับ และต้องใช้ termination/rating ที่ถูกต้อง
+
+34. Polychrome Spectrum — ขั้นสูงกว่า Max Hold
+
+PR200 มี CS-PC Polychrome Spectrum
+
+R&S อธิบายว่า option นี้ใช้ความถี่การเกิดของ signal level มา encode เป็นสี ทำให้แยก pulsed signals ที่ซ้อนกันและบางครั้งแยกไม่ได้ด้วย spectrum, waterfall หรือ Max Hold ธรรมดา
+
+ตัวอย่างมี signal 2 ตัว frequency เดียวกัน:
+
+Signal A
+เกิดบ่อย
+
+Signal B
+แรงกว่า แต่เกิดน้อย
+
+Max Hold อาจเห็นแค่:
+
+Signal B สูงสุด
+
+แต่ Polychrome ช่วยให้เห็น distribution ของ occurrence
+
+นี่เหมาะกับ RF environment ที่ซับซ้อนมาก
+
+35. PR200 รุ่นปัจจุบันยังมี CS-IA
+
+R&S แสดง option CS-IA Interference Analysis ซึ่งทำ automatic detection of harmonics and intermodulation products
+
+ถ้าเครื่องของคุณมี license นี้ จะช่วย shortlist:
+
+Possible harmonic
+Possible intermod product
+
+ได้เร็วมาก
+
+แต่ผมยังแนะนำให้เข้าใจสูตรก่อน
+
+เพราะ software บอกว่า:
+
+candidate intermod
+
+ไม่ได้หมายความว่าต้นเหตุได้รับการพิสูจน์แล้ว
+
+36. Workflow วิเคราะห์ Unknown Signal
+
+นี่เป็น flow ที่ควรจำ:
+
+Unknown Peak
+    ↓
+Center Frequency
+    ↓
+Narrow Span
+    ↓
+Adjust RBW
+    ↓
+Spectrum Shape
+    ↓
+Waterfall
+    ↓
+Continuous / Burst / Hop?
+    ↓
+Peak / RMS Detector
+    ↓
+Max Hold / Average
+    ↓
+OBW
+    ↓
+Channel Power
+    ↓
+Demodulation
+    ↓
+Zero Span
+    ↓
+Timing
+    ↓
+ATT Test
+    ↓
+Harmonic / Intermod check
+    ↓
+Direction / Homing
+37. ตัวอย่างเต็ม: 138.125 MHz
+
+สมมติ PScan พบ:
+
+138.125 MHz
+-62 dBm
+Step 1 — Receiver
+Center = 138.125 MHz
+Span   = 200 kHz
+Step 2 — Narrow
+Span = 50 kHz
+Step 3 — Measure
+
+ได้:
+
+OBW = 12.8 kHz
+Step 4 — Waterfall
+
+พบ:
+
+Burst ทุก 2 s
+Step 5 — Zero Span
+ON = 80 ms
+Period = 2 s
+
+ประมาณ duty cycle:
+
+$$ \frac{0.08}{2}\times100 =4\% $$
+Step 6 — ATT
+ATT 0 dB
+signal present
+
+ATT +10
+signal behavior remains
+
+ATT +20
+signal remains
+
+ยังน่าเชื่อว่าเป็น external signal
+
+Step 7 — Check harmonics
+
+ค้น:
+
+276.250 MHz = 2 × 138.125
+414.375 MHz = 3 × 138.125
+
+ถ้าพบ timing เหมือนกัน อาจมี harmonic relation
+
+Step 8 — HE400
+
+ทำ Homing ต่อ
+
+ตอนนี้เรารู้ fingerprint ของ target ชัดมากแล้ว:
+
+138.125 MHz
+OBW 12.8 kHz
+80 ms burst
+2 s period
+
+ดังนั้นโอกาสเดินตาม signal ผิดตัวลดลงมาก
+
+38. วิธีอ่าน Signal แบบ Quick Diagnosis
+สิ่งที่เห็น	ควรคิดถึง
+เส้นแคบมาก	Carrier/CW
+ก้อนกว้างต่อเนื่อง	Digital/broadband
+Peak หลายเท่าของ f₀	Harmonic
+Peaks ตาม 2f₁−f₂	Intermod candidate
+Noise floor ยกทั้งช่วง	Broadband EMI/overload
+Signal เป็นช่วง	Burst/pulse
+กระโดด frequency	Hopping
+เส้นเฉียงใน waterfall	Sweep/chirp-like
+Max Hold เยอะ แต่ current น้อย	intermittent environment
+เพิ่ม ATT แล้ว peaks แปลกหาย	receiver overload/intermod suspect
+
+ตารางนี้เป็น แนวทางวินิจฉัยเบื้องต้น ไม่ใช่ proof
+
+39. วิธีใช้งานในงานตรวจรับ
+
+ถ้าจะทำ measurement ให้มีคุณภาพ อย่าบันทึกแค่ screenshot
+
+ควรเก็บ:
+
+Date / Time
+Location
+Antenna
+Cable
+Frequency
+Span
+RBW / Resolution
+Detector
+ATT / Gain
+OBW
+Channel Power
+Signal Level
+Noise Floor
+Waterfall duration
+Zero-span timing
+Screenshot / Trace
+
+เพราะถ้าอีกคนกลับมาทดสอบใหม่ จะสามารถสร้าง measurement condition เดิมได้
+
+40. แบบฝึกบทที่ 5
+
+เลือก signal ที่ได้รับอนุญาตให้ตรวจหนึ่งตัว แล้วทำ 5 รอบ:
+
+รอบ A — Spectrum
+
+บันทึก:
+
+Freq =
+Peak =
+Noise =
+Span =
+RBW =
+รอบ B — Waterfall
+
+ระบุ:
+
+Continuous / Burst / Hop =
+รอบ C — Trace
+
+เปรียบเทียบ:
+
+Normal
+Max Hold
+Average
+รอบ D — Spectral Measurement
+
+ถ้าเครื่องมี CS-SPM:
+
+OBW =
+Channel Power =
+Center Offset =
+Method =
+รอบ E — Time Domain
+
+ถ้ามี CS-ZS:
+
+ON Time =
+OFF Time =
+Period =
+Duty Cycle =
+
+เมื่อทำครบ คุณควรสามารถเขียน conclusion แบบนี้ได้:
+
+พบ emission ที่ 138.125 MHz มี occupied bandwidth 12.8 kHz ลักษณะ intermittent burst ระยะประมาณ 80 ms ทุก 2 s การทดสอบ attenuation ไม่พบพฤติกรรมที่ชี้ชัดว่าเป็น receiver-generated artifact จึงจัดเป็น external RF candidate และควรดำเนินการ direction finding/homing ต่อ
+
+นี่คือระดับรายงานที่ใช้ใน troubleshooting ได้จริง
+
+สูตรจำของบท 5
+Spectrum = อยู่ที่ไหน
+Waterfall = เกิดตอนไหน
+Max Hold = เคยเกิดอะไร
+Average = พฤติกรรมเฉลี่ย
+OBW = กว้างเท่าไร
+Channel Power = กำลังรวมเท่าไร
+Zero Span = เปิด/ปิดอย่างไร
+ATT Test = จริงหรือ receiver หลอก
+Harmonic/Intermod = สัมพันธ์กับ signal อื่นไหม
+
+และสิ่งสำคัญที่สุด:
+
+Spectrum shape เป็น clue ไม่ใช่คำตัดสิน
+
+ต้องใช้ Frequency + Level + Bandwidth + Timing + ATT behavior + Spatial behavior ประกอบกัน
+
+บทที่ 6 ต่อไปผมแนะนำให้ลงลึก Automatic DF ของ PR200 / CS-DF โดยเฉพาะ DF Quality, bearing, DF bandwidth, integration/measurement time, วิธีอ่าน bearing ที่ไม่น่าเชื่อถือ, วิธีแยก “Monitoring รับได้แต่ DF ไม่ออก” และ troubleshooting chain ตั้งแต่ Receiver → DF Antenna → RF Path → GPS/Compass → Multipath ซึ่งตรงกับปัญหางานสถานีของคุณมากที่สุดครับ
+
+ต่อ บทที่ 6
+บทที่ 6 — Automatic DF ด้วย PR200 + CS-DF
+
+บทนี้ต่างจาก HE400 ในบท 4 เพราะเราจะเปลี่ยนจาก Manual Homing ไปเป็น Automatic Angle-of-Arrival (AoA) Direction Finding โดยใช้ PR200 + option R&S CS-DF + compact DF antenna ที่รองรับ เช่นตระกูล ADDx07 ตาม configuration ของระบบ
+
+R&S ระบุว่า CS-DF ทำให้ PR200 เป็น AoA direction finder และสามารถทำ DF กับสัญญาณภายใน real-time bandwidth ได้สูงสุด 40 MHz; ช่วง DF ของ PR200 โดยรวมอยู่ที่ 9 MHz–8 GHz แต่ช่วงจริงขึ้นกับ DF antenna ที่ต่ออยู่ด้วย
+
+1. Automatic DF ต่างจาก HE400 ยังไง
+HE400 Manual Homing
+
+เราเป็นคนหมุนเสา:
+
+PR200 → Level
+
+0°   -82
+45°  -71
+90°  -53  ← Peak
+135° -69
+
+แล้วตีความว่า source น่าจะมาทาง ~90°
+
+Automatic DF
+
+DF antenna มีหลาย antenna elements และระบบวิเคราะห์ phase/amplitude relationship ระหว่าง element
+
+จากนั้นให้ผลโดยตรงประมาณ:
+
+Azimuth = 087°
+
+DF Quality = ...
+Level = ...
+Frequency = 138.125 MHz
+
+ใน configuration ที่ใช้ ADDx07 นั้น R&S ระบุว่าใช้ correlative interferometer method และระบบสามารถให้ typical DF accuracy ระดับประมาณ 1°–3° RMS ตาม antenna/frequency/configuration ที่เหมาะสม แต่ค่านี้เป็น performance ของระบบภายใต้เงื่อนไขที่กำหนด ไม่ใช่รับประกันว่าหน้างานเมืองหรือพื้นที่ multipath จะได้ 1° เสมอ
+
+2. Signal Level กับ Bearing เป็นคนละ measurement
+
+จุดนี้สำคัญมากกับปัญหา:
+
+Monitoring รับสัญญาณได้ แต่ DF ไม่ออก
+
+Receiver ถามว่า:
+
+มีพลังงาน RF หรือไม่?
+
+DF ถามยากกว่านั้น:
+
+สัญญาณที่ antenna elements หลายตัวรับมา
+มี phase/amplitude relationship
+เพียงพอให้คำนวณทิศทางหรือไม่?
+
+ดังนั้นเหตุการณ์นี้เป็นไปได้:
+
+Monitoring
+Level = -65 dBm
+Signal ✓
+
+Automatic DF
+Bearing = ---
+Quality ต่ำ
+DF ✗
+
+ไม่ขัดแย้งกัน
+
+3. สิ่งที่ Automatic DF ต้องมีครบ
+
+มองเป็น chain:
+
+RF Source
+   ↓
+Propagation
+   ↓
+DF Antenna
+   ↓
+Antenna elements
+   ↓
+RF/DF cable path
+   ↓
+PR200 + CS-DF
+   ↓
+DF algorithm
+   ↓
+Compass / orientation
+   ↓
+Bearing
+
+ปัญหาที่จุดใดจุดหนึ่งสามารถทำให้:
+
+Receiver = OK
+DF = FAIL
+
+ได้
+
+4. ก่อนเริ่ม DF ให้ตรวจ Hardware/Option ก่อน
+
+อย่างน้อยต้องมี:
+
+PR200
++
+CS-DF license
++
+Compatible compact DF antenna
++
+Correct cabling/interface
+
+PR200 ปัจจุบันระบุ CS-DF เป็น option สำหรับ direction finding of signals within the real-time bandwidth และรองรับ compact DF antennas ของ R&S ตามย่านที่รองรับ
+
+ถ้าใช้ HE400:
+
+นั่นเป็น manual homing workflow คนละแบบ
+
+อย่าสับสนกับ Automatic AoA DF
+
+5. เริ่มจาก Signal Verification ก่อน DF เสมอ
+
+สมมติ:
+
+Target = 138.125 MHz
+
+ก่อนเปิด DF ให้ Receiver วิเคราะห์ก่อน:
+
+Frequency  = 138.125 MHz
+Level      = -65 dBm
+BW         = ~12.5 kHz
+Pattern    = Continuous/Burst?
+SNR        = ?
+
+ตรวจ Waterfall ด้วย
+
+เพราะถ้า target เป็น:
+
+burst 5 ms
+ทุก 30 s
+
+ปัญหาการ DF จะต่างจาก carrier continuous โดยสิ้นเชิง
+
+6. เข้า DF Mode
+
+ชื่อเมนู/ตำแหน่งอาจต่างเล็กน้อยตาม firmware/configuration แต่ workflow คือ:
+
+APP
+ ↓
+DF / Direction Finding
+
+เลือก target frequency
+
+ตัวอย่าง:
+
+Center Frequency = 138.125 MHz
+
+แล้วให้ spectrum ครอบ candidate อย่างเหมาะสม
+
+7. Polar DF Display อ่านอะไร
+
+หน้าจอ DF ของ PR200 สามารถแสดงผลแบบ polar diagram เช่น:
+
+                  0°
+                   N
+                   ↑
+
+             . . . | . . .
+         .         |        .
+270° W  -----------+---------- 90° E
+         .          \
+           .         \
+             .        \ 87°
+                  ↓
+                 Source
+
+ตัวเลขเช่น:
+
+Azimuth = 087°
+
+หมายถึงระบบประเมินว่าคลื่นมาจากทิศนั้นตาม reference/orientation ที่ระบบใช้อยู่
+
+R&S แสดง PR200 CS-DF ในลักษณะ polar display และสามารถแสดง DF ของหลาย signal ภายใน real-time bandwidth ได้พร้อมกันด้วย
+
+8. Bearing ไม่เท่ากับตำแหน่ง
+
+ถ้าได้:
+
+Bearing = 87°
+
+เรารู้แค่:
+
+Source น่าจะอยู่ตามแนว 87° จากจุดวัด
+
+แต่ยังไม่รู้ระยะ
+
+Station A
+    \
+     \
+      \ 87°
+       \
+        ????????? Source
+
+ดังนั้นต้องใช้:
+
+หลาย DF stations
+หรือย้ายสถานีไปวัดหลายจุด
+หรือ Mobile DF
+
+เพื่อ radiolocation
+
+9. DF Quality สำคัญกว่าตัว Bearing เดี่ยว ๆ
+
+ถ้าหน้าจอขึ้น:
+
+Bearing = 86°
+
+อย่าอ่านแค่ 86°
+
+ต้องถาม:
+
+86° นี้น่าเชื่อถือแค่ไหน?
+
+ค่า Quality/validity ของ DF มีไว้ช่วยบอกความน่าเชื่อถือของ solution จากข้อมูลที่ระบบได้รับ
+
+หลักคิด:
+
+Bearing
++
+DF Quality
++
+Level/SNR
++
+Stability over time
+
+ต้องดูร่วมกัน
+
+ไม่ควรใช้:
+
+Bearing = 86°
+จบ
+10. อย่ากำหนดเกณฑ์ Quality แบบเดา
+
+เช่นไม่ควรบอกว่า:
+
+Quality > 70 = ผ่าน
+Quality < 70 = ไม่ผ่าน
+
+โดยไม่มี specification ของ configuration/TOR/manual
+
+เพราะ scaling และ acceptance criteria ต้องอ้างอิงระบบและ requirement ที่ใช้จริง
+
+ให้ตีความเบื้องต้นเป็น:
+
+High / Stable Quality
+→ solution น่าเชื่อถือขึ้น
+
+Low / fluctuating Quality
+→ ต้องตรวจ RF/environment/settings
+
+ถ้าจะใช้เป็น SAT/Acceptance criterion ต้องเปิด manual/specification ของชุด DF รุ่นที่ใช้จริงก่อน
+
+11. Bearing Stability เป็นตัวชี้วัดที่ดีมาก
+
+สมมติ transmitter อยู่กับที่
+
+Case A
+85°
+86°
+85°
+87°
+86°
+
+มี repeatability ดี
+
+Case B
+25°
+187°
+320°
+74°
+240°
+
+อันนี้ผิดปกติสำหรับ stationary source
+
+ต้องตรวจ:
+
+multipath
+SNR
+bandwidth
+overload
+antenna environment
+cable/antenna
+compass/orientation
+
+ก่อนสรุปว่า transmitter กำลังเปลี่ยนทิศ
+
+12. DF Bandwidth สำคัญมาก
+
+สมมติ target กว้าง:
+
+~12.5 kHz
+
+ถ้า DF bandwidth แคบเกินไป:
+
+Target
+
+|---------------|
+
+DF BW
+     |---|
+
+ระบบใช้พลังงานของ signal เพียงบางส่วน
+
+SNR สำหรับ DF อาจแย่ลง
+
+แต่ถ้ากว้างเกิน:
+
+Wanted       Neighbor
+  ███           ███
+
+|------------------------|
+        DF BW
+
+อาจเอาพลังงานจาก signal อื่นเข้ามาด้วย
+
+หลักคือ:
+
+DF bandwidth ต้องสัมพันธ์กับ occupied bandwidth ของ target
+
+ไม่ควรตั้งกว้างที่สุดตลอด
+
+13. Measurement / Integration Time
+
+แนวคิดสำคัญคือ DF algorithm ต้องมีข้อมูลพอสำหรับประเมิน AoA
+
+Continuous Signal
+
+สามารถ integrate นานขึ้นได้ง่าย
+
+██████████████████████
+Short Burst
+__██________________██______
+
+ถ้า measurement window ไม่สัมพันธ์กับ burst:
+
+Measurement
+       |-------|
+
+Signal
+__██____________________
+
+อาจไม่มีข้อมูลพอ
+
+ดังนั้นถ้า:
+
+Monitoring เห็น burst แต่ DF No Bearing
+
+ต้องเช็กเรื่อง signal duration เทียบกับ DF measurement behavior ด้วย
+
+14. Signal Level สูง ไม่ได้แปลว่า DF Quality ต้องสูง
+
+ตัวอย่าง:
+
+Level = -40 dBm
+
+ดูแรงมาก
+
+แต่:
+
+Direct signal
++
+Reflection #1
++
+Reflection #2
++
+Reflection #3
+
+DF antenna ได้หลาย incoming paths
+
+AoA solution อาจสับสน
+
+ผล:
+
+Strong signal
+BUT
+Poor/unstable DF
+
+จึงอย่าคิดว่า:
+
+Signal แรง = Bearing ต้องดี
+
+15. Multipath คือศัตรูหลักของ AoA DF
+
+ตัวอย่าง:
+
+                Building
+                │
+TX ─────────────┼────→ DF
+ \              │
+  \_____________│────→ DF
+      reflection
+
+DF antenna อาจเห็น:
+
+30° direct
+
++
+110° reflection
+
++
+280° reflection
+
+ถ้า reflected component แข็งแรง จะเกิด:
+
+bearing offset
+bearing jump
+Quality ลด
+bearing หลายกลุ่ม
+16. วิธีทดสอบ Multipath ที่ง่ายที่สุด
+
+ย้าย DF antenna
+
+ตัวอย่าง Point A:
+
+Bearing = 45°
+Quality unstable
+
+ย้าย 10–30 m:
+
+Point B
+Bearing = 47°
+stable
+
+ย้ายอีก:
+
+Point C
+Bearing = 44°
+stable
+
+Point A น่าจะเป็น measurement location ที่ไม่ดี
+
+R&S เองใช้ statistical/mobile localization เพื่อจัดการผล DF ที่ถูกรบกวนจาก reflections ใน urban multipath environment โดยเก็บ DF results จำนวนมากและคัด readings ที่ไม่สอดคล้องออก
+
+17. Antenna Location สำคัญมาก
+
+Automatic DF antenna ไม่ควรวางแบบ:
+
+DF Antenna
+
+20 cm
+
+██████████
+Metal wall
+
+หรือ:
+
+Tower
+│
+│ ← DF antenna ชิดมาก
+│
+
+เพราะโครงสร้างโลหะจะเปลี่ยน RF environment
+
+ควรเลือกตำแหน่ง:
+
+             DF Antenna
+                 ▲
+
+        มี clearance รอบเสา
+
+────────────────────────
+          Rooftop
+
+ให้มากที่สุดเท่าที่ installation อนุญาต
+
+18. Compass / Orientation Error
+
+นี่เป็นอีกปัญหาที่ต่างจาก RF
+
+สมมติ DF algorithm คำนวณ relative direction ถูก:
+
+Relative = 30°
+
+แต่ antenna orientation/reference ผิดไป:
+
++15°
+
+final bearing อาจเป็น:
+
+45°
+
+ดังนั้นต้องแยก:
+
+RF DF Error
+
+algorithm หา AoA ผิด
+
+กับ
+
+Heading/Orientation Error
+
+AoA relative ถูก แต่แปลงเป็น geographic azimuth ผิด
+
+19. วิธีตรวจ Compass/Orientation เบื้องต้น
+
+ใช้ source ที่ทราบตำแหน่ง
+
+สมมติจาก antenna ไป transmitter จริง:
+
+True bearing = 90°
+
+แต่ระบบอ่านซ้ำ ๆ:
+
+104°
+105°
+104°
+
+Error ค่อนข้างคงที่:
+
+≈ +14°
+
+รูปแบบนี้ควรสงสัย:
+
+heading reference
+orientation
+antenna alignment
+compass/calibration
+
+มากกว่า random multipath
+
+เพราะ multipath มักทำให้ variation ซับซ้อนกว่า fixed offset แม้ไม่เสมอไป
+
+20. Pattern ของ Fault บอกสาเหตุได้
+Fixed Offset
+True      DF
+0°        15°
+90°       105°
+180°      195°
+270°      285°
+
+ทุกจุดผิดประมาณ:
+
++15°
+
+สงสัย:
+
+orientation/calibration/reference
+
+Random Bearing
+True TX fixed
+
+DF:
+20
+170
+305
+80
+240°
+
+สงสัย:
+
+multipath / SNR / RF path / unstable DF data
+
+One Frequency Band Bad
+530 MHz → correct
+138 MHz → incorrect
+
+สงสัย:
+
+band-specific antenna path
+antenna characteristics
+RF environment
+strong signal environment
+multipath
+frequency-specific hardware issue
+21. Monitoring OK แต่ DF No Bearing — Troubleshooting Tree
+
+นี่ตรงกับปัญหาที่คุณเคยเจอมากที่สุด
+
+ใช้ flow นี้:
+
+Monitoring signal present?
+        │
+        ├─ NO
+        │    ↓
+        │  แก้ Receiver/RF reception ก่อน
+        │
+        └─ YES
+             ↓
+      Frequency in DF antenna range?
+             │
+          NO ─┴→ Antenna/config
+             │
+            YES
+             ↓
+      Signal BW / DF BW suitable?
+             │
+             ↓
+      Signal duration sufficient?
+             │
+             ↓
+        SNR sufficient?
+             │
+             ↓
+      Receiver overloaded?
+             │
+             ↓
+     DF antenna/interface OK?
+             │
+             ↓
+     Orientation/compass OK?
+             │
+             ↓
+      Multipath severe?
+             │
+             ↓
+        DF result
+22. Step 1 — เปรียบเทียบ Monitoring Level
+
+จดจริง:
+
+138 MHz
+Monitoring Level = ______ dBm
+Noise Floor      = ______ dBm
+
+530 MHz
+Monitoring Level = ______ dBm
+Noise Floor      = ______ dBm
+
+อย่าเปรียบเทียบแต่ absolute dBm
+
+ดู:
+
+$$ SNR \approx Signal - Noise $$
+
+เช่น:
+
+138 MHz
+Signal = -72
+Noise  = -78
+
+SNR ≈ 6 dB
+530 MHz
+Signal = -75
+Noise  = -105
+
+SNR ≈ 30 dB
+
+แม้ 138 MHz absolute level สูงกว่า แต่ DF conditions แย่กว่ามาก
+
+23. Step 2 — ดู Signal Shape และ BW
+
+เปิด Receiver:
+
+138 MHz
+
+Span → narrow
+Waterfall ON
+
+วัด:
+
+OBW ≈ ?
+
+จากนั้นตรวจว่า DF BW ครอบ signal อย่างเหมาะสมหรือไม่
+
+ถ้า target เป็น 200 kHz wide แต่ DF ใช้ bandwidth เล็กมาก ย่อมไม่ใช่ condition ที่ดี
+
+24. Step 3 — ดู Timing
+
+Waterfall:
+
+████████████
+
+Continuous → ง่ายกว่า
+
+แต่ถ้า:
+
+██
+
+          ██
+
+                     ██
+
+เป็น intermittent
+
+ให้จด:
+
+Burst duration =
+Period =
+
+แล้วเทียบกับ behavior ของ DF
+
+25. Step 4 — ATT Test
+
+โดยเฉพาะกรณี FM/VHF ที่มี strong broadcast อยู่ใกล้ ๆ
+
+ทดสอบ:
+
+ATT = Auto/0
+DF = unstable
+
+เพิ่มอย่างเหมาะสม:
+
+ATT +10 dB
+
+ถ้า:
+
+DF Quality ↑
+Bearing stable ↑
+
+มีเหตุผลให้สงสัย strong-signal/overload environment
+
+หากเพิ่ม attenuation แล้ว target หายเพราะ signal อ่อน ก็แปลว่าไปไกลเกิน ต้องหาจุดสมดุล
+
+26. DF Dynamic Range ต้องอยู่ “ตรงกลาง”
+
+อย่าให้:
+
+อ่อนเกิน
+Noise █████████
+Signal   ███████
+
+SNR ไม่พอ
+
+และอย่าให้:
+
+แรงเกิน
+Receiver Front End
+████████████████████
+      overload
+
+เป้าหมายคือ:
+
+Noise ______
+
+Signal      █████████
+
+มี margin เหมาะสม
+27. Step 5 — ทดสอบด้วย Known Source
+
+นี่เป็น test ที่ผมแนะนำมากสำหรับ maintenance
+
+ใช้ source/transmitter ที่ทราบ:
+
+Frequency
+Position
+Bearing
+
+จาก DF antenna
+
+เช่น:
+
+Known true bearing = 120°
+
+วัด:
+
+Result 1 = 121°
+Result 2 = 119°
+Result 3 = 120°
+
+ระบบมี repeatability ดีใน condition นี้
+
+แล้วเปลี่ยน frequency ไปอีก band
+
+28. ทำ Frequency Matrix
+
+เช่น:
+
+Frequency	Known Bearing	DF Result	Error	Quality/Stability
+100 MHz	120°	151°	+31°	Poor
+138 MHz	120°	148°	+28°	Poor
+300 MHz	120°	124°	+4°	Good
+530 MHz	120°	121°	+1°	Good
+900 MHz	120°	122°	+2°	Good
+
+ถ้า pattern แบบนี้เกิดซ้ำ:
+
+มีแนวโน้มเป็น low-band-specific issue
+
+มากกว่าระบบทั้งชุดพัง
+
+29. ทำ Azimuth Matrix ด้วย
+
+อย่าทดสอบ transmitter อยู่ทิศเดียว
+
+ทดสอบ source หลาย azimuth เช่น:
+
+0°
+90°
+180°
+270°
+
+ผล:
+
+True	DF	Error
+0°	2°	+2°
+90°	92°	+2°
+180°	182°	+2°
+270°	272°	+2°
+
+เห็น fixed offset ~+2°
+
+แตกต่างจาก:
+
+True	DF
+0°	35°
+90°	74°
+180°	245°
+270°	190°
+
+ซึ่งชี้ไปทาง RF/environment/problem ที่ซับซ้อนกว่า
+
+30. Wideband DF เป็นจุดเด่นมาก
+
+CS-DF ไม่ได้จำกัดว่าต้องหา bearing ทีละ carrier เท่านั้น
+
+R&S ระบุว่าสามารถทำ wideband DF สูงสุด 40 MHz real-time bandwidth และแสดง:
+
+Azimuth
+    ↑
+
+300°       █
+250°
+200°                 █
+150°
+100°   █
+ 50°
+  0°________________________→ Frequency
+      f1       f2       f3
+
+กล่าวคือเห็น:
+
+f1 → bearing 90°
+f2 → bearing 280°
+f3 → bearing 190°
+
+พร้อมกันได้ใน realtime bandwidth
+
+31. DF Waterfall
+
+อีก function ที่มีประโยชน์:
+
+Azimuth / Frequency
++
+Time
+
+เหมาะกับ:
+
+moving transmitter
+intermittent source
+hopping/variable activity
+bearing เปลี่ยนตามเวลา
+
+R&S ระบุว่าสามารถ track การเปลี่ยน azimuth ตามเวลาด้วย color-coded DF waterfall ได้
+
+32. ตัวอย่าง Moving Source
+
+สมมติรถส่งสัญญาณกำลังเคลื่อน:
+
+Time ↓
+
+90°     █
+95°      █
+105°       █
+120°          █
+140°              █
+
+เราจะเห็น bearing เปลี่ยนอย่างต่อเนื่อง
+
+ต่างจาก multipath random:
+
+90°     █
+230°              █
+40°   █
+310°                  █
+80°     █
+
+แต่ต้องดูข้อมูลอื่นประกอบ ไม่ควรใช้ pattern นี้ตัดสินเพียงอย่างเดียว
+
+33. Triangulation
+
+สถานี A:
+
+Bearing 60°
+
+สถานี B:
+
+Bearing 310°
+
+แนว bearing ตัดกัน:
+
+A
+ \
+  \
+   \
+    X ← emitter
+   /
+  /
+ /
+B
+
+ยิ่ง bearing accuracy ดีและ geometry ดี localization ยิ่งดี
+
+34. Geometry สำคัญมาก
+
+กรณีแย่:
+
+A ----------------→
+
+B ----------------→
+
+bearing เกือบ parallel
+
+จุดตัดไวต่อ error มาก
+
+กรณีดีกว่า:
+
+A
+ \
+  \
+   X
+  /
+ /
+B
+
+intersection angle ชัดกว่า
+
+ดังนั้นจำนวน station มากไม่ได้หมายความว่า geometry ดีเสมอ
+
+35. Sporadic Interference ทำ Triangulation ได้ไหม?
+
+ได้ ถ้าหลายสถานีจับ event เดียวกันได้ หรือวัดจากหลายตำแหน่งอย่างสัมพันธ์กัน
+
+R&S ยก use case การใช้ PR200-based transportable DF stations หลายสถานีสำหรับ triangulation ของ sporadic interferers โดยติด compact DF antennas บน tripod ณ จุดวัดต่าง ๆ
+
+นี่เป็น use case ที่เหมาะกับงาน monitoring network มาก
+
+36. Mobile DF
+
+สำหรับ continuous emitter สามารถใช้ PR200 + compact DF antenna บนรถร่วมกับ R&S MobileLocator
+
+ระบบเก็บ DF results จำนวนมากระหว่างเคลื่อนที่ แล้วใช้ statistical processing ช่วยลดผลจาก multipath/reflection ในเมือง
+
+แนวคิด:
+
+Car
+↓
+Point 1  → bearing
+Point 2  → bearing
+Point 3  → bearing
+Point 4  → bearing
+...
+↓
+Statistical localization
+↓
+Estimated emitter position
+
+นี่เหนือกว่า manual triangulation ไม่กี่จุดใน urban environment มาก
+
+37. Case Study — 138 MHz Monitoring รับได้ แต่ No Bearing
+
+สมมติ:
+
+Receiver:
+
+138.000 MHz
+Level = -63 dBm
+Signal clearly visible
+
+แต่:
+
+DF:
+
+Bearing = ---
+
+ผมจะตรวจตามลำดับนี้:
+
+A. Target
+Frequency correct?
+Signal real?
+Continuous/Burst?
+OBW?
+B. DF Settings
+DF frequency correct?
+DF BW appropriate?
+Measurement behavior suitable?
+C. Dynamic range
+ATT Auto
+↓
+ลอง condition ที่เหมาะสม
+↓
+ดู Quality/Bearing
+D. Antenna
+Correct DF antenna?
+Frequency band supported?
+Connection/interface OK?
+Self-test?
+
+PR200 มี built-in self-test สำหรับ troubleshooting/maintenance ด้วย
+
+E. Environment
+Metal obstruction?
+Tower?
+Building?
+Strong transmitter?
+Multipath?
+F. Control Test
+Known source
+Same frequency band
+Known bearing
+38. ถ้า 530 MHz ผ่าน แต่ 138 MHz ไม่ผ่าน
+
+นี่คือ experiment ที่ผมอยากให้ทำ:
+
+                    138 MHz       530 MHz
+
+Level               ______        ______
+Noise                ______        ______
+SNR                  ______        ______
+OBW                  ______        ______
+DF BW                ______        ______
+ATT                   ______        ______
+Bearing              ______        ______
+Quality              ______        ______
+Stability             ______        ______
+
+จากนั้นทดสอบ ตำแหน่งและ source geometry เดียวกันเท่าที่ทำได้
+
+ถ้า 530 ดีแต่ 138 แย่ซ้ำ ๆ จะ narrow down fault domain ได้เยอะมาก
+
+39. Failure Pattern Cheat Sheet
+อาการ	สิ่งที่ควรสงสัยก่อน
+Receiver ไม่เห็น + DF ไม่เห็น	RF/source/antenna path
+Receiver เห็น แต่ DF No Bearing	DF BW, SNR, signal duration, antenna/DF path
+Bearing คงที่แต่ offset	Orientation/heading/calibration
+Bearing กระโดดแรง	Multipath/SNR/RF issue
+เพิ่ม ATT แล้ว DF ดีขึ้น	Strong-signal/overload suspect
+Low band แย่ แต่ high band ดี	Band-specific antenna/path/environment
+ทุก frequency ผิดคล้ายกัน	Common hardware/orientation/config
+เฉพาะบางตำแหน่งผิด	Multipath/site environment
+Known source ผ่าน แต่ field signal ไม่ผ่าน	Signal/environment-specific
+40. Acceptance Test ที่ผมแนะนำ
+
+สำหรับสถานี DF ผมไม่อยากให้ตรวจเพียง:
+
+Bearing ถูก ✓
+
+ควรเก็บอย่างน้อย:
+
+Frequency
+True bearing
+Measured bearing
+Bearing error
+Signal level
+Noise/SNR
+DF quality
+DF bandwidth
+ATT/Gain
+Signal type
+Measurement duration
+Antenna/configuration
+Test position
+Repeat measurements
+
+และควรทดสอบหลาย:
+
+Frequency
++
+Azimuth
+
+เพื่อป้องกันกรณี:
+
+ผ่านที่ 530 MHz แต่เสียจริงที่ VHF
+
+สรุปบทที่ 6
+
+จำแก่นนี้:
+
+MONITORING
+"รับได้ไหม?"
+
+        ↓
+
+AUTOMATIC DF
+"ข้อมูลที่ antenna หลาย element รับมา
+ดีพอจะคำนวณ AoA ไหม?"
+
+        ↓
+
+BEARING
+"คลื่นมาจากทางไหน?"
+
+        ↓
+
+MULTIPLE BEARINGS
+"Source อยู่ที่ไหน?"
+
+และสำหรับ troubleshooting ให้จำ:
+
+Level ดี ≠ DF ดี
+
+ต้องดูพร้อมกันอย่างน้อย:
+
+SNR + DF BW + Signal Duration + DF Quality/Stability + Antenna/Orientation + Multipath + Overload
+
+โดยเฉพาะกรณีของงานคุณที่ 138 MHz Monitoring รับได้แต่ DF ไม่ขึ้น ขณะที่ 530 MHz ทำงานได้ รูปแบบนี้มีค่ามากในการวิเคราะห์ เพราะมันช่วยชี้ว่าควรแยกตรวจ low-band antenna/RF path/environment ก่อนจะเหมารวมว่าระบบ DF ทั้งชุดเสีย.
+
+บทที่ 7 ต่อไป: ผมจะสอน DF Troubleshooting Lab แบบเป็นขั้นตอนจริง โดยเอาเคส 138 MHz No Bearing / 530 MHz Bearing OK มาจำลอง แล้วออกแบบ Test Matrix ว่า ต้องปรับ ATT, DF BW, Level, เปลี่ยนตำแหน่ง, ทดสอบ known source, swap cable/antenna path อย่างไร และแต่ละผลบอกสาเหตุอะไร เพื่อให้คุณสามารถใช้เป็น procedure หน้างานได้เลย.
