@@ -15,6 +15,17 @@ function initNavigation() {
   const sidebarButtons = document.querySelectorAll('.sidebar-item-btn');
   const pillArray = Array.from(chapterPills);
 
+  // Initialize roving tabindex (APG Tabs Pattern)
+  pillArray.forEach(p => {
+    if (p.classList.contains('active')) {
+      p.setAttribute('tabindex', '0');
+      p.setAttribute('aria-selected', 'true');
+    } else {
+      p.setAttribute('tabindex', '-1');
+      p.setAttribute('aria-selected', 'false');
+    }
+  });
+
   // Chapter pill switching
   chapterPills.forEach((pill, idx) => {
     pill.addEventListener('click', () => {
@@ -23,9 +34,11 @@ function initNavigation() {
       chapterPills.forEach(p => {
         p.classList.remove('active');
         p.setAttribute('aria-selected', 'false');
+        p.setAttribute('tabindex', '-1');
       });
       pill.classList.add('active');
       pill.setAttribute('aria-selected', 'true');
+      pill.setAttribute('tabindex', '0');
 
       chapterSections.forEach(sec => {
         if (sec.id === `section-${targetChapter}`) {
@@ -345,11 +358,11 @@ function applyPR200Preset(presetKey) {
       badgeBorder: 'rgba(239,68,68,0.35)',
       pulseColor: '#EF4444',
       title: 'CS-IQ RECORDING & TECHNICAL AUDIT STREAM',
-      toast: '🔴 พรีเซ็ต 06_RECORD (06_TECHNICAL_RECORD): บันทึก I/Q กว้าง 40 MHz RTBW อัตรา 50 MSa/s ประทับเวลา GNSS UTC สำหรับเป็นหลักฐานประกอบการวิเคราะห์และรายงานภาคสนาม (Audit Trail)',
+      toast: '🔴 พรีเซ็ต 06_RECORD (06_TECHNICAL_RECORD): บันทึก I/Q กว้างสูงสุด 40 MHz RTBW Snapshot ประทับเวลา GNSS UTC สำหรับเป็นหลักฐานประกอบการวิเคราะห์และรายงานภาคสนาม (Audit Trail)',
       stats: [
         { label: 'Bandwidth บันทึก I/Q', val: '40 MHz RTBW (138 MHz Ctr)', color: 'var(--text-primary)' },
         { label: 'ระดับสัญญาณ Peak', val: '-65.0 dBm (Digital Flat)', color: '#38BDF8' },
-        { label: 'สถานะการบันทึก', val: '● REC ON (50 MSa/s)', color: '#EF4444' },
+        { label: 'สถานะการบันทึก', val: '● REC ON (40 MHz Snapshot)', color: '#EF4444' },
         { label: 'พิกัด GNSS / Time', val: '13.7563°N, 100.5018°E (UTC)', color: 'var(--accent-amber)' }
       ]
     }

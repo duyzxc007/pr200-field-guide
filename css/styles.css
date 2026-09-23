@@ -493,6 +493,18 @@ body {
   backdrop-filter: blur(12px);
 }
 
+.roadmap-bar::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 36px;
+  background: linear-gradient(to right, transparent, rgba(14, 14, 19, 0.95));
+  pointer-events: none;
+  opacity: 0.9;
+}
+
 .roadmap-scroll {
   display: flex;
   gap: 8px;

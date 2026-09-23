@@ -515,7 +515,7 @@ class HeroPreviewCanvas {
      ------------------------------------------------------------------------- */
   renderIQRecording(ctx, w, h, splitY) {
     ctx.fillStyle = '#EF4444';
-    ctx.fillText('[ CS-IQ RECORDING | 40 MHz RTBW | 50 MSa/s | TECHNICAL AUDIT ]', 45, 16);
+    ctx.fillText('[ CS-IQ RECORDING | 40 MHz RTBW SNAPSHOT | TECHNICAL AUDIT ]', 45, 16);
 
     // Flashing REC Dot
     const isBlink = Math.floor(this.time * 2) % 2 === 0;
@@ -3546,14 +3546,14 @@ class PR200HardwareConsole {
         type: 'Power & Safety',
         desc: 'ปุ่มยางเปิด-ปิดเครื่อง พร้อมไฟ LED หลากสีแสดงสถานะการทำงาน การชาร์จ และการแจ้งเตือนความผิดพลาดของระบบพลังงาน',
         workflow: [
-          'กด 1 ครั้ง: เปิดเครื่อง PR200 (ระบบจะทำการ Self-test และบูตเข้าหน้าจอหลักภายใน ~35 วินาที)',
+          'กด 1 ครั้ง: เปิดเครื่อง PR200 (ระบบจะทำการ Self-test และบูตเข้าหน้าจอหลักภายใน ~35 วินาที [จากการทดสอบเครื่องจริงพร้อม Option พื้นฐาน])',
           'กดค้าง 1 วินาทีขณะเปิดอยู่: แสดงหน้าต่างยืนยันการปิดเครื่อง (Power Off dialog)',
           'ไฟเขียวค้าง = เครื่องเปิดทำงานปกติ (Power ON)',
           'ไฟส้มกะพริบ = กำลังชาร์จแบตเตอรี่ (Charging via Adapter)',
           'ไฟส้มค้าง = แบตเตอรี่ชาร์จเต็มแล้ว (Fully Charged in Standby)',
           'ไฟแดงค้าง/กะพริบ = ข้อผิดพลาดของระบบหรืออุณหภูมิแบตเตอรี่สูงเกินเกณฑ์'
         ],
-        protip: '⚠️ ขั้นตอน Factory Reset ฉุกเฉิน: ขณะเปิดเครื่อง ให้กดปุ่ม Power ค้างไว้ 4 วินาที เครื่องจะล้างค่าและรีเซ็ตระบบกลับสู่ค่าโรงงานอัตโนมัติ'
+        protip: '🚨 ข้อควรระวังสูงสุด (Factory Reset Protocol): การกดปุ่ม Power ค้าง 4 วินาทีขณะเปิดเครื่องจะล้างข้อมูลทั้งหมด (Memory List, Positions List, Suppress List) และคืนค่าโรงงานโดยลบ Softkey apps เหลือเฉพาะ F1 Edit และ F2 Receiver ต้องสำรองข้อมูลด้วย Manage > Export Lists และได้รับอนุมัติก่อนทำทุกครั้ง'
       },
       'lock_button': {
         nameTh: 'ปุ่มล็อกแป้นพิมพ์ & โหมดพรางตัว (Keypad Lock & Stealth Mode 🔒)',
