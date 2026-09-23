@@ -3374,9 +3374,9 @@ class PR200HardwareConsole {
       'rf_in': {
         nameTh: 'พอร์ตรับสัญญาณวิทยุ RF IN (Snap-N / N-Type)',
         nameEn: 'RF Input Port (8 kHz – 8 GHz, 50 Ω)',
-        location: 'ด้านบนซ้าย (Top Panel)',
-        type: 'RF Port',
-        desc: 'พอร์ตรับสัญญาณหลักของเครื่อง รองรับความถี่กว้างพิเศษตั้งแต่ 8 kHz ถึง 8 GHz พร้อม Dynamic Range สูง ออกแบบเป็นขั้ว N-Type มาตรฐานที่รองรับทั้งเกลียว N ปกติ และหัวสวมเร็ว Snap-N สำหรับภาคสนาม',
+        location: 'ด้านบนตัวเครื่อง (Top Panel Center-Left)',
+        type: 'RF Input Port',
+        desc: 'พอร์ตรับสัญญาณหลักของเครื่อง รองรับความถี่กว้างพิเศษตั้งแต่ 8 kHz ถึง 8 GHz พร้อม Dynamic Range สูง ออกแบบเป็นขั้ว N-Type มาตรฐานที่รองรับทั้งเกลียว N ปกติ และหัวสวมเร็ว Snap-N สำหรับปฏิบัติการภาคสนาม',
         workflow: [
           'ตรวจสอบระดับสัญญาณ: ห้ามเกิน +20 dBm (0.1 W) / 0 V DC เด็ดขาดเพื่อป้องกัน Front-End เสียหาย',
           'การต่อสาย Snap-N: ดันปลอกหัวต่อเข้าตรงๆ จนได้ยินเสียงคลิก (ถอดสลับสายอากาศได้ใน 1 วินาที)',
@@ -3386,11 +3386,11 @@ class PR200HardwareConsole {
         protip: 'มีฝายางกันละอองน้ำและฝุ่นมาตรฐาน IP54 ครอบไว้เสมอเมื่อไม่ได้ต่อสายอากาศ เพื่อป้องกันความชื้นและฝุ่นทรายเข้าแกน Coaxial'
       },
       'top_tuning': {
-        nameTh: 'ลูกบิดหมุนจูนความถี่ด้านบน (Top Rotary Knob)',
+        nameTh: 'ลูกบิดหมุนจูนความถี่ด้านบน (Top Frequency Tuning Knob)',
         nameEn: 'Top Frequency Tuning Knob',
-        location: 'ด้านบนกึ่งกลาง (Top Center)',
-        type: 'Rotary Control',
-        desc: 'ลูกบิดหมุนปรับจูนความถี่ละเอียดที่ออกแบบไว้ด้านบนตัวเครื่องโดยเฉพาะ เพื่อให้ผู้ปฏิบัติงานสามารถเอื้อมมือปรับจูนความถี่ได้สะดวกรวดเร็วขณะสะพายเครื่องแนบลำตัว (Harness Field Operation)',
+        location: 'ด้านบนกึ่งกลาง (Top Panel Center)',
+        type: 'Tactile Rotary Knob',
+        desc: 'ลูกบิดหมุนปรับจูนความถี่ละเอียดที่ออกแบบไว้ด้านบนตัวเครื่องโดยเฉพาะ เพื่อให้ผู้ปฏิบัติงานสามารถเอื้อมมือปรับจูนความถี่ได้สะดวกรวดเร็วขณะสะพายเครื่องแนบลำตัว (Harness Field Operation) โดยไม่ต้องก้มมองหน้าจอ',
         workflow: [
           'สะพายเครื่อง PR200 แนบข้างสะโพกหรือหน้าอกด้วยสายสะพาย 4 จุด',
           'เอื้อมมือข้างที่ว่างหมุนลูกบิดด้านบนเพื่อปรับเลื่อนความถี่ตาม Frequency Step (เช่น ทีละ 25 kHz หรือ 100 kHz)',
@@ -3400,10 +3400,10 @@ class PR200HardwareConsole {
         protip: 'การใช้ลูกบิดด้านบนช่วยเพิ่มความคล่องตัวในสนามขึ้นอย่างมาก โดยเฉพาะการเดินสำรวจ (Walk Test) ในพื้นที่แคบหรือขึ้นบันได'
       },
       'top_func': {
-        nameTh: 'ลูกบิดมัลติฟังก์ชัน & วอลลุ่มเสียง (Function Knob & Audio)',
+        nameTh: 'ลูกบิดมัลติฟังก์ชัน & วอลลุ่มเสียง (Top Function & Volume Knob)',
         nameEn: 'Top Function Knob (MGC / Squelch / Tone) & Audio Volume',
-        location: 'ด้านบนขวา (Top Right)',
-        type: 'Audio & Control',
+        location: 'ด้านบนขวา (Top Panel Right)',
+        type: 'Audio & Control Knob',
         desc: 'ชุดควบคุมเสียงภาคสนาม ประกอบด้วยลูกบิด Volume เปิด/ปิดเสียง, ช่องเสียบหูฟัง 3.5 mm Stereo, และลูกบิดฟังก์ชันอเนกประสงค์สำหรับกดเลือกและหมุนปรับ MGC, Squelch, และ Tone Pitch',
         workflow: [
           'หมุนลูกบิด Volume: เปิดสวิตช์และหมุนปรับระดับความดังของเสียง Demodulation',
@@ -3413,82 +3413,124 @@ class PR200HardwareConsole {
         ],
         protip: 'ในโหมด Level Tone ความถี่เสียงหวีดจะสูงขึ้นตามความแรงสัญญาณ (dBm) เป็นเครื่องมือชี้ทิศที่ดีที่สุดในการทำ Manual Homing ด้วยเสา HE400'
       },
-      'function_keys': {
-        nameTh: 'แถบปุ่มฟังก์ชันหลักแถวบน (Top-Row Function Keys)',
-        nameEn: 'Top-Row Function Hardkeys (Freq, Span, Dem BW, Demod, App, Setup)',
-        location: 'ด้านหน้าเหนือหน้าจอ (Front Upper)',
-        type: 'Function Hardkeys',
-        desc: 'ปุ่มกดฮาร์ดแวร์แถวบนสำหรับเข้าสู่พารามิเตอร์การวัดหลักได้ทันที ตอบสนองฉับไว ออกแบบมาให้กดได้แม่นยำแม้ขณะสวมถุงมือปฏิบัติการภาคสนาม',
+      'carry_strap': {
+        nameTh: 'สายสะพายไหล่/อก & ห่วงคล้องปลดเร็ว (Ergonomic Harness & Mounts)',
+        nameEn: 'Shoulder/Chest Harness with Quick-Release D-Rings',
+        location: 'ด้านบนและห่วงข้างตัวเครื่อง (Top & Side Mounts)',
+        type: 'Ergonomic Harness',
+        desc: 'สายสะพายไหล่และหน้าอกออกแบบพิเศษตามหลักสรีรศาสตร์ กระจายน้ำหนักเครื่อง 3.5 กก. เข้าสู่ลำตัวอย่างสมดุล ช่วยให้เดินสำรวจ (Walk-Test) ได้นานหลายชั่วโมงโดยไม่เมื่อยล้า พร้อมห่วงสลักเหล็กปลดเร็ว',
         workflow: [
-          'กด [Freq]: กำหนดความถี่ Center Frequency, Start/Stop Freq, หรือเลือกตารางช่องสัญญาณ',
-          'กด [Span]: ปรับความกว้างแถบสเปกตรัมที่แสดงผล (ตั้งแต่ 1 kHz จนถึง Real-time Bandwidth 40 MHz)',
-          'กด [Dem BW]: เลือกแบนด์วิดท์ตัวกรองเสียง (เช่น 150 kHz สำหรับ FM, 9 kHz สำหรับ AM, 300 kHz สำหรับดิจิทัล)',
-          'กด [Demod]: เลือกชนิดการถอดรหัสเสียง (FM, AM, Pulse, USB, LSB, CW, IQ)',
-          'กด [App]: เปิดหน้าต่างเลือกแอปพลิเคชัน (Receiver, Polychrome, PScan, MScan, FScan, Level Mapping)'
+          'คล้องสายสะพายเข้ากับห่วงเหล็ก D-Ring ทั้ง 4 มุม เพื่อกระจายน้ำหนัก 3.5 kg ลงบนสองบ่าอย่างสมดุล',
+          'ปรับความตึงสายให้เครื่องแนบระดับอกพอดี ในมุมที่มองเห็นหน้าจอ 6.5 นิ้วได้สะดวก',
+          'มือข้างหนึ่งถือเสา HE400 กวาดทิศทาง อีกข้างสามารถเอื้อมหมุนลูกบิด Top Tuning Knob ด้านบนได้ทันที'
         ],
-        protip: 'เมื่ออยู่ในแอปพลิเคชันใดก็ตาม การกดปุ่ม Hardkey เหล่านี้จะเรียกเมนูย่อยของพารามิเตอร์นั้นมาแสดงที่แถบ Softkey F1–F7 ใต้จอทันที'
+        protip: 'การจัดท่าสะพายระดับอกช่วยให้สายตามองกวาดหน้าจอกับภูมิประเทศจริงสลับกันได้ทันทีโดยไม่ต้องก้มศีรษะ'
       },
       'display_screen': {
-        nameTh: 'หน้าจอสีความละเอียดสูง 6.5 นิ้ว (Daylight-Readable LCD)',
-        nameEn: '6.5\" Anti-Glare High-Resolution Display',
-        location: 'กึ่งกลางตัวเครื่อง (Front Center)',
-        type: 'Display',
-        desc: 'จอแสดงผลสีขนาด 6.5 นิ้ว เคลือบสารลดแสงสะท้อน มองเห็นชัดเจนแม้อยู่กลางแดดจัด แสดงผล Real-time Spectrum, Waterfall, Polychrome และแผนที่ OpenStreetMap พร้อมรองรับระบบสัมผัส (Touchscreen)',
+        nameTh: 'หน้าจอสีความสว่างสูง 6.5 นิ้ว (Sunlight-Readable Display)',
+        nameEn: '6.5\" Anti-Glare Sunlight-Readable Color LCD',
+        location: 'กึ่งกลางตอนบน (Front Center-Upper)',
+        type: 'Daylight LCD Display',
+        desc: 'จอแสดงผลสีขนาด 6.5 นิ้ว ความสว่างสูงพิเศษ เคลือบสารลดแสงสะท้อน มองเห็นชัดเจนแม้อยู่กลางแดดจัด แสดงผล Real-time Spectrum, Waterfall, Polychrome และแผนที่ OpenStreetMap พร้อมรองรับระบบสัมผัส (Touchscreen)',
         workflow: [
           'แถบสถานะด้านบน: แสดงชื่อแอป, Center Frequency, Attenuation (Auto/Manual), และสถานะแบตเตอรี่/GPS',
           'พื้นที่แสดงผลหลัก: แสดงรูปคลื่นสเปกตรัมและผืนน้ำตกความถี่พร้อมกันบนแกนความถี่เดียวกัน',
           'การแตะสัมผัส: สามารถใช้นิ้วแตะที่ยอดคลื่นเพื่อวาง Peak Marker หรือลากเพื่อเลื่อนความถี่ได้โดยตรง',
-          'แถบ Softkeys ด้านล่าง: แสดงฟังก์ชันของปุ่ม F1–F7 ที่เปลี่ยนไปตามแต่ละเมนู'
+          'แถบ Softkeys ด้านล่าง: แสดงฟังก์ชันของปุ่ม F1–F6 ที่เปลี่ยนไปตามแต่ละเมนู'
         ],
         protip: 'หากใช้งานในสภาพแวดล้อมฝนตกหรือสวมถุงมือหนา สามารถปิดระบบ Touchscreen แล้วควบคุมด้วยปุ่มกด 100% ได้อย่างปลอดภัย'
       },
       'softkeys': {
-        nameTh: 'แถบปุ่มซอฟต์คีย์ใต้จอ (Context-Sensitive Softkeys F1–F7)',
-        nameEn: 'Dynamic Softkeys F1 to F7',
-        location: 'แถวล่างใต้หน้าจอ (Front Lower)',
-        type: 'Dynamic Softkeys',
-        desc: 'ชุดปุ่มกด 7 ปุ่มใต้หน้าจอที่เปลี่ยนหน้าที่และป้ายข้อความกำกับตามบริบทของเมนูที่กำลังใช้งาน ช่วยให้เข้าถึงคำสั่งย่อยได้โดยไม่ต้องใช้ระบบสัมผัส',
+        nameTh: 'แถบปุ่มซอฟต์คีย์ใต้จอ F1–F6 (Dynamic Softkeys F1 to F6)',
+        nameEn: 'Dynamic Softkeys F1 to F6',
+        location: 'ใต้หน้าจอ 6.5 นิ้วโดยตรง (Directly Below Screen)',
+        type: 'Context Softkeys',
+        desc: 'ชุดปุ่มกด 6 ปุ่มใต้หน้าจอที่เปลี่ยนหน้าที่และป้ายข้อความกำกับตามบริบทของเมนูที่กำลังใช้งาน ช่วยให้เข้าถึงคำสั่งย่อยได้โดยไม่ต้องใช้ระบบสัมผัส',
         workflow: [
-          'ดูข้อความกำกับที่แถบล่างสุดของจอเหนือปุ่ม F1–F7 เพื่อทราบหน้าที่ปัจจุบัน',
-          'ในหน้าหลักแอป: F1=Edit/Manage, F2=Receiver, F3=Polychrome, F4=PSCAN, F5=MSCAN, F6=Next Row, F7=Back',
+          'ดูข้อความกำกับที่แถบล่างสุดของจอเหนือปุ่ม F1–F6 เพื่อทราบหน้าที่ปัจจุบัน',
+          'ในหน้าหลักแอป: F1=Edit, F2=Receiver, F3=Polychrome, F4=PSCAN, F5=MSCAN, F6=Next Row',
           'ในเมนู Freq: F1=Center Freq, F2=Span, F3=Step Size, F4=Channel Table',
-          'ปุ่ม F6 (Next Row): กดเพื่อสลับไปยังแถวปุ่มซอฟต์คีย์ถัดไปเมื่อเมนูมีคำสั่งเกิน 7 รายการ'
+          'ปุ่ม F6 (Next Row): กดเพื่อสลับไปยังแถวปุ่มซอฟต์คีย์ถัดไปเมื่อเมนูมีคำสั่งเกิน 6 รายการ'
         ],
         protip: 'หลังการทำ Factory Reset แอป Receiver จะถูกตั้งเป็นค่าเริ่มต้นที่ปุ่ม F2 เสมอ (F1 จะเป็นปุ่ม Edit เสมอ)'
       },
-      'rotary_knob': {
-        nameTh: 'ปุ่มหมุนปรับจูนความละเอียดสูงด้านหน้า (Front Precision Rotary Knob)',
-        nameEn: 'Rotary Knob with Center [OK] Push Button',
-        location: 'ด้านขวาของหน้าจอ (Front Right)',
-        type: 'Rotary Encoder',
-        desc: 'อุปกรณ์ควบคุมหลักของเครื่อง PR200 ออกแบบด้วยวงล้อขนาดใหญ่จับถนัดมือ มีร่องยางกันลื่น พร้อมปุ่ม [OK] ตรงกลางสำหรับกดยืนยันการเลือกคำสั่งหรือค่าตัวเลข',
+      'function_keys': {
+        nameTh: 'แถบปุ่มฟังก์ชันหลักแถวบน (Top-Row Function Hardkeys)',
+        nameEn: 'Top Function Hardkeys (Freq, Dem, Spectrum, Trace, Gain, Marker, Meas, Preset)',
+        location: 'ใต้แถว Softkeys (Front Mid-Upper)',
+        type: 'Dedicated Function Keys',
+        desc: 'ปุ่มกดฮาร์ดแวร์แถวบนทรงวงรี 8 ปุ่มสำหรับเข้าสู่พารามิเตอร์การวัดหลักได้ทันที รวมถึงปุ่ม [Preset] สีเขียวสำหรับเรียกคืนค่าเริ่มต้นของระบบ',
         workflow: [
-          'หมุนตามเข็มนาฬิกา: เพิ่มค่าความถี่, เพิ่มระดับเสียง, หรือเลื่อนเคอร์เซอร์ลง/ขวา',
-          'หมุนทวนเข็มนาฬิกา: ลดค่าความถี่, ลดระดับเสียง, หรือเลื่อนเคอร์เซอร์ขึ้น/ซ้าย',
-          'กดปุ่มกึ่งกลาง [OK]: ทำหน้าที่เทียบเท่าปุ่ม [Enter] เพื่อยืนยันการเลือกในกล่องข้อความหรือเปิดแอปพลิเคชัน',
-          'การเลือกหลักตัวเลข: กดลูกบิดเพื่อสลับเคอร์เซอร์ไปยังหลัก MHz, kHz หรือ Hz เพื่อจูนความเร็วสูง'
+          'กด [Freq]: กำหนดความถี่ Center Frequency, Start/Stop Freq, หรือเลือกตารางช่องสัญญาณ',
+          'กด [Dem]: เลือกชนิดการถอดรหัสเสียง (FM, AM, Pulse, USB, LSB, CW, IQ) และตั้งค่า Demod BW',
+          'กด [Spectrum]: ปรับค่า Span และ Resolution Bandwidth (RBW)',
+          'กด [Trace]: เลือกโหมดแสดงผล Trace (Clear/Write, Max Hold, Min Hold, Average)',
+          'กด [Gain]: ตั้งค่า Attenuation (Auto / Manual 0–40 dB) และเปิด Pre-amplifier',
+          'กด [Marker]: วาง Marker วัดความถี่และระดับ dBm ยอดคลื่น',
+          'กด [Preset]: (ปุ่มสีเขียว) คืนค่าพารามิเตอร์ทั้งหมดสู่ค่ามาตรฐานของโหมดงานนั้น'
         ],
-        protip: 'สามารถใช้ลูกบิดนี้ร่วมกับปุ่มลูกศรเพื่อการนำทางเมนูและการตั้งค่าภาคสนามได้รวดเร็วกว่าการกดปุ่มสัมผัสหลายเท่า'
+        protip: 'เมื่ออยู่ในแอปพลิเคชันใดก็ตาม การกดปุ่ม Hardkey เหล่านี้จะเรียกเมนูย่อยของพารามิเตอร์นั้นมาแสดงที่แถบ Softkey F1–F6 ใต้จอทันที'
+      },
+      'app_key': {
+        nameTh: 'ปุ่ม [App] สีฟ้า & App Config (Dedicated Application Switcher)',
+        nameEn: 'Dedicated Blue [App] Key & [App Config]',
+        location: 'แถบแนวตั้งฝั่งซ้าย (Front Left Column)',
+        type: 'Application Switcher',
+        desc: 'ปุ่มทรงกลมสีฟ้าโดดเด่นอันเป็นเอกลักษณ์ของเครื่อง R&S PR200 กดเพียง 1 ครั้งเพื่อเปิดหน้าต่าง Application Selection สลับไปยัง 6 โหมดงานหลักทันที (Receiver, FScan, MScan, DF, Polychrome, Level Mapping)',
+        workflow: [
+          'กดปุ่ม [App] สีฟ้า 1 ครั้ง: หน้าต่าง Application Selection จะแสดงขึ้นมากลางจอ',
+          'หมุนลูกบิด Rotary ด้านหน้าเพื่อเลือกแอปที่ต้องการ',
+          'กดปุ่ม Enter ตรงกลางลูกบิดเพื่อยืนยันการสลับโหมด หรือกดปุ่ม Softkey F1–F6 ที่ตรงกับชื่อแอป',
+          'กดปุ่ม [App Config] ด้านล่างปุ่ม App เพื่อปรับแต่งการทำงานขั้นสูงของแอปปัจจุบัน (เช่น เปิด Dual VFO ในโหมด Receiver)'
+        ],
+        protip: 'ปุ่ม [App] สีฟ้าถูกออกแบบแยกโซนออกมาฝั่งซ้ายเพื่อให้กดสลับโหมดงานหลักได้ด้วยนิ้วโป้งซ้ายอย่างรวดเร็วขณะถือเครื่อง'
       },
       'numeric_keypad': {
         nameTh: 'แป้นพิมพ์ตัวเลขและปุ่มกำหนดหน่วยตรง (Numeric Keypad & Unit Keys)',
         nameEn: 'Numeric Keypad (0–9, ., -) & Direct Engineering Unit Keys',
-        location: 'มุมล่างขวาของตัวเครื่อง (Front Lower-Right)',
-        type: 'Input Keypad',
-        desc: 'แป้นพิมพ์ตัวเลข 0–9 จุดทศนิยม เครื่องหมายลบ พร้อมปุ่มลัดหน่วยวัดวิศวกรรม (GHz, MHz, kHz, Hz, dBm, dBµV) ช่วยให้ป้อนค่าความถี่และระดับสัญญาณได้ทันทีโดยไม่ต้องกด Enter',
+        location: 'แผงกลางฝั่งซ้าย (Front Center-Left)',
+        type: 'Numeric Entry & Units',
+        desc: 'แป้นพิมพ์ตัวเลข 0–9 จุดทศนิยม เครื่องหมายลบ พร้อมปุ่มลัดหน่วยวัดวิศวกรรม (GHz/n, MHz/µ, kHz/m, x1) และปุ่มกล้องถ่ายภาพหน้าจอ 📷 ช่วยให้ป้อนค่าความถี่ได้ทันทีโดยไม่ต้องกด Enter',
         workflow: [
           'กดปุ่มพารามิเตอร์ที่ต้องการป้อนค่า เช่น กด [Freq] แล้วกด F1 [Center Freq]',
           'กดตัวเลขบนแป้นพิมพ์ เช่น [1] [0] [3] [.] [5]',
           'กดปุ่มหน่วยที่ต้องการทันที เช่น [MHz] ค่าจะถูกยืนยันและนำไปใช้งานทันที!',
-          'หากพิมพ์ผิด ให้กดปุ่ม [BACK] เพื่อลบตัวเลขทีละหลัก หรือกดปุ่ม ESC เพื่อยกเลิก'
+          'กดปุ่มรูปกล้อง 📷 (แถวล่างสุด): ถ่ายภาพหน้าจอปัจจุบันและบันทึกลงการ์ด SD Card ทันทีใน 1 วินาที'
         ],
         protip: 'ฟังก์ชัน Direct Unit Entry (พิมพ์ตัวเลขแล้วกดปุ่มหน่วย) ถือเป็นเอกลักษณ์ของเครื่อง R&S ที่ช่วยลดขั้นตอนการทำงานหน้างานได้กว่าครึ่ง'
       },
+      'rotary_knob': {
+        nameTh: 'ปุ่มหมุนปรับจูนความละเอียดสูงด้านหน้า (Front Main Rotary Knob)',
+        nameEn: 'Main Rotary Knob with Finger Dimple & Center Push',
+        location: 'แผงฝั่งขวา (Front Right)',
+        type: 'Precision Rotary Dial',
+        desc: 'ลูกบิดหมุนควบคุมหลักของเครื่อง PR200 ออกแบบด้วยวงล้อขนาดใหญ่จับถนัดมือ มีหลุมนิ้ว (Finger Dimple) สำหรับใช้นิ้วชี้ปั่นหมุนเร็วต่อเนื่อง พร้อมปุ่มกดตรงกลางสำหรับยืนยันค่า',
+        workflow: [
+          'หมุนตามเข็มนาฬิกา: เพิ่มค่าความถี่, เลื่อน Marker ไปทางขวา, หรือเลื่อนเคอร์เซอร์ลง',
+          'หมุนทวนเข็มนาฬิกา: ลดค่าความถี่, เลื่อน Marker ไปทางซ้าย, หรือเลื่อนเคอร์เซอร์ขึ้น',
+          'ใช้นิ้วชี้หมุนในหลุม Dimple: ปั่นกวาดความถี่ข้ามย่านได้อย่างรวดเร็วและนุ่มนวล',
+          'กดตรงกลางลูกบิด: ทำหน้าที่เทียบเท่าปุ่ม [Enter] ยืนยันการเลือก'
+        ],
+        protip: 'สามารถใช้ลูกบิดนี้ร่วมกับปุ่ม [Step] เพื่อกำหนดขนาดการกระโดดความถี่ในแต่ละกริ๊ก (เช่น Step 100 kHz หรือ 1 MHz)'
+      },
+      'history_rec': {
+        nameTh: 'ปุ่มเล่นย้อนหลัง Play/Pause ▶|| & บันทึกเสียง/สัญญาณ (History Mode & Record)',
+        nameEn: 'Spectrum History Play/Pause ▶|| & Red Record Key',
+        location: 'ข้างขวาลูกบิด Rotary (Right of Rotary Dial)',
+        type: 'Buffer Playback & Storage',
+        desc: 'ปุ่ม Play/Pause สำหรับหยุดและเล่นย้อนหลังสเปกตรัมที่บันทึกไว้ในหน่วยความจำบัฟเฟอร์ (History Buffer) ทำให้สามารถกรอย้อนกลับไปดูคลื่นรบกวนที่โผล่มาเพียงเสี้ยววินาทีได้ พร้อมปุ่มอัดเสียง/Raw I/Q สีแดง',
+        workflow: [
+          'กดปุ่ม [Play/Pause ▶||]: หน้าจอสเปกตรัมและน้ำตกจะหยุดนิ่ง (Freeze) ทันที',
+          'หมุนลูกบิด Rotary ถอยหลัง: กรอย้อนกลับไปดูเฟรมสัญญาณในอดีต (History Buffer) เพื่อวิเคราะห์สัญญาณ Burst หรือคลื่นกวนที่ดับไปแล้ว',
+          'กดปุ่ม [REC] (จุดกลมสีแดง): บันทึกสัญญาณเสียง Demodulation หรือ Raw I/Q Data ลงในการ์ด SD Card ทันที'
+        ],
+        protip: 'History Mode มีประโยชน์อย่างยิ่งในการจับภาพคลื่นกวนที่ส่งแบบไม่ต่อเนื่อง (Intermittent Interference) ซึ่งไม่สามารถวัดได้ทันในโหมดสด'
+      },
       'cursor_keys': {
-        nameTh: 'ปุ่มลูกศรนำทาง 4 ทิศทาง (Cursor Navigation Keys)',
+        nameTh: 'ปุ่มลูกศรนำทาง 4 ทิศทาง & Enter (4-Way Cursor D-Pad)',
         nameEn: '4-Way Directional Cursor Keys with Center Enter',
-        location: 'ด้านขวาถัดจากแป้นพิมพ์ (Front Right)',
-        type: 'Navigation Keys',
+        location: 'ด้านล่างใต้ลูกบิด Rotary (Front Lower-Right)',
+        type: 'Navigation D-Pad',
         desc: 'ชุดปุ่มลูกศร ขึ้น-ลง-ซ้าย-ขวา พร้อมปุ่ม Enter กึ่งกลาง สำหรับเลื่อนแถบเคอร์เซอร์, ปรับเปลี่ยน Reference Level, และเลื่อน Marker ไปตามยอดคลื่น',
         workflow: [
           'ลูกศรซ้าย/ขวา: เลื่อน Marker ไปตามแกนความถี่เพื่อวัดความถี่และระดับ dBm ของแต่ละยอดคลื่น',
@@ -3500,7 +3542,7 @@ class PR200HardwareConsole {
       'power_button': {
         nameTh: 'ปุ่มเปิด-ปิดเครื่อง & ไฟ LED สถานะแบตเตอรี่ (Power Button & Status LED)',
         nameEn: 'Power Button with Multi-color Battery/Status LED',
-        location: 'มุมขวาล่างสุด (Front Bottom-Right)',
+        location: 'มุมซ้ายล่างสุด (Front Bottom-Left)',
         type: 'Power & Safety',
         desc: 'ปุ่มยางเปิด-ปิดเครื่อง พร้อมไฟ LED หลากสีแสดงสถานะการทำงาน การชาร์จ และการแจ้งเตือนความผิดพลาดของระบบพลังงาน',
         workflow: [
@@ -3514,11 +3556,11 @@ class PR200HardwareConsole {
         protip: '⚠️ ขั้นตอน Factory Reset ฉุกเฉิน: ขณะเปิดเครื่อง ให้กดปุ่ม Power ค้างไว้ 4 วินาที เครื่องจะล้างค่าและรีเซ็ตระบบกลับสู่ค่าโรงงานอัตโนมัติ'
       },
       'lock_button': {
-        nameTh: 'ปุ่มล็อกแป้นพิมพ์ & โหมดพรางตัว (Lock Button & Stealth Mode)',
+        nameTh: 'ปุ่มล็อกแป้นพิมพ์ & โหมดพรางตัว (Keypad Lock & Stealth Mode 🔒)',
         nameEn: 'Keypad Lock & Stealth Mode Control',
-        location: 'ด้านบนเหนือลูกบิด Rotary (Front Upper-Right)',
+        location: 'มุมขวาล่างสุด (Front Bottom-Right)',
         type: 'Security Control',
-        desc: 'ปุ่มควบคุมความปลอดภัย ป้องกันการกดปุ่มโดยไม่ตั้งใจขณะสะพายเดินภาคสนาม และใช้เปิดโหมดพรางตัว (Stealth Mode) สำหรับภารกิจตรวจการลับ',
+        desc: 'ปุ่มรูปแม่กุญแจสำหรับควบคุมความปลอดภัย ป้องกันการกดปุ่มโดยไม่ตั้งใจขณะสะพายเดินภาคสนาม และใช้เปิดโหมดพรางตัว (Stealth Mode) สำหรับภารกิจตรวจการลับ',
         workflow: [
           'กดปุ่ม Lock 1 ครั้ง: หน้าจอจะแสดงตัวเลือกระหว่าง [Keypad Lock] และ [Stealth Mode]',
           'เลือก Keypad Lock: ล็อกปุ่มกดทั้งหมดเพื่อป้องกันการกดโดนขณะสะพายเครื่อง (กด Lock ซ้ำเพื่อปลด)',
@@ -3526,19 +3568,6 @@ class PR200HardwareConsole {
           '⚠️ วิธียกเลิก Stealth Mode ฉุกเฉิน: ต้องกดปุ่ม Lock ติดกัน 3 ครั้งอย่างรวดเร็ว (Triple-click Lock key) หน้าจอจึงจะสว่างกลับมา'
         ],
         protip: 'Stealth Mode มีความสำคัญสูงสุดในภารกิจเฝ้าตรวจเวลากลางคืน เพื่อไม่ให้แสงจากจอหรือไฟ LED เผยพิกัดของทีมตรวจการ'
-      },
-      'bumpers_mounts': {
-        nameTh: 'ขอบยางกันกระแทก & ห่วงคล้องสายสะพาย (Rugged Bumpers & Harness Mounts)',
-        nameEn: 'Shock-Absorbing Rubber Bumpers & 4-Point Harness Mounts',
-        location: 'มุมทั้งสี่และด้านข้างตัวเครื่อง (Chassis & Corners)',
-        type: 'Physical Protection',
-        desc: 'เกราะยางกันกระแทกสีฟ้า-เทาที่มุมทั้งสี่ ทนต่อการตกกระแทกตามมาตรฐานกองทัพ MIL-STD-810G พร้อมห่วงคล้องสายสะพายเหล็ก 4 จุดสำหรับจัดท่าสะพายเดินสำรวจ',
-        workflow: [
-          'ยึดสายสะพาย 4 จุด: คล้องห่วงทั้ง 4 มุมเพื่อกระจายน้ำหนัก 3.5 kg ลงบนบ่าสองข้างอย่างสมดุล',
-          'ท่าปฏิบัติงานเดินเท้า: เครื่องจะแนบอยู่ระดับอกในมุมที่เอื้อมมือหมุนลูกบิดด้านบนและมองจอได้สะดวก',
-          'การปกป้องภาคสนาม: ขอบยางช่วยซับแรงกระแทกเมื่อวางบนพื้นขรุขระ คอนกรีต หรือตัวถังรถยนต์'
-        ],
-        protip: 'ช่องระบายความร้อนด้านข้างมีซีลกันละอองน้ำและฝุ่นมาตรฐาน IP54 สามารถปฏิบัติงานกลางสายฝนปรอยหรือพื้นที่ฝุ่นละอองสูงได้ปลอดภัย'
       }
     };
 
@@ -3588,7 +3617,7 @@ class PR200HardwareConsole {
 
     if (btnAppMenu) {
       btnAppMenu.addEventListener('click', () => {
-        this.selectHotspot('function_keys');
+        this.selectHotspot('app_key');
         this.setScreenState('app_select');
       });
     }
@@ -3663,7 +3692,7 @@ class PR200HardwareConsole {
   }
 
   handlePinAction(id) {
-    if (id === 'function_keys') {
+    if (id === 'app_key' || id === 'function_keys') {
       this.setScreenState('app_select');
     } else if (id === 'numeric_keypad') {
       this.setScreenState('freq_input');
@@ -3678,6 +3707,8 @@ class PR200HardwareConsole {
       this.centerFreq = Number((this.centerFreq + 0.1).toFixed(3));
       this.updateScreenHeaders();
     } else if (id === 'softkeys') {
+      this.setScreenState('normal');
+    } else if (id === 'history_rec') {
       this.setScreenState('normal');
     }
   }

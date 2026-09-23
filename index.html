@@ -257,85 +257,102 @@
               <!-- Quick Simulation Toolbar -->
               <div class="pr200-quick-sim-bar" role="toolbar" aria-label="แถบจำลองการกดปุ่มด่วน">
                 <span class="pr200-quick-sim-label">⚡ ทดสอบฟังก์ชันจริง:</span>
-                <button type="button" class="pr200-quick-btn" id="btnSimReceiver">📻 1. โหมด Receiver (103.5 MHz)</button>
-                <button type="button" class="pr200-quick-btn" id="btnSimAppMenu">📱 2. กดปุ่ม [App] เลือกแอป</button>
+                <button type="button" class="pr200-quick-btn" id="btnSimReceiver">📻 1. โหมด Receiver</button>
+                <button type="button" class="pr200-quick-btn" id="btnSimAppMenu">📱 2. กดปุ่ม [App] สีฟ้า</button>
                 <button type="button" class="pr200-quick-btn" id="btnSimFreq">🔢 3. กด [Freq] ตั้งความถี่</button>
-                <button type="button" class="pr200-quick-btn" id="btnSimDemod">🔊 4. กด [Demod] เลือกเสียง</button>
-                <button type="button" class="pr200-quick-btn" id="btnSimStealth">🕶️ 5. กด [Lock] Stealth Mode</button>
-                <button type="button" class="pr200-quick-btn" id="btnSimReset" style="color:var(--accent-amber); font-weight:bold;">🔄 คืนค่าจอปกติ</button>
+                <button type="button" class="pr200-quick-btn" id="btnSimDemod">🔊 4. กด [Dem] เลือกเสียง</button>
+                <button type="button" class="pr200-quick-btn" id="btnSimStealth">🕶️ 5. กด [Lock] Stealth</button>
+                <button type="button" class="pr200-quick-btn" id="btnSimReset" style="color:var(--accent-amber); font-weight:bold;">🔄 คืนค่าปกติ</button>
               </div>
 
-              <!-- Stage: Real Hardware Photo with Overlay Pins & Virtual Screen -->
-              <div class="pr200-stage-wrapper">
-                <img src="design/pr200_front_panel.jpg" alt="R&S PR200 Front Panel & Controls Diagram" class="pr200-base-img" width="1920" height="1080" loading="lazy">
+              <!-- Two-column Layout: Portrait Handheld Device + Inspector Panel -->
+              <div class="pr200-console-layout">
+                <!-- Left Column: Portrait Device Console -->
+                <div class="pr200-stage-wrapper">
+                  <img src="design/pr200_front_panel.jpg" alt="R&S PR200 Portable Monitoring Receiver Front Panel" class="pr200-base-img" width="560" height="900" loading="lazy">
 
-                <!-- 12 Interactive Hotspot Pins -->
-                <button type="button" class="pr200-hotspot-pin" style="left: 33.8%; top: 15.5%;" data-hotspot="rf_in" aria-label="Hotspot 01: พอร์ต RF IN">01</button>
-                <button type="button" class="pr200-hotspot-pin" style="left: 51.0%; top: 15.2%;" data-hotspot="top_tuning" aria-label="Hotspot 02: ลูกบิดจูนความถี่ด้านบน">02</button>
-                <button type="button" class="pr200-hotspot-pin" style="left: 63.0%; top: 18.0%;" data-hotspot="top_func" aria-label="Hotspot 03: ลูกบิด Function & Volume">03</button>
-                <button type="button" class="pr200-hotspot-pin active" style="left: 40.5%; top: 32.2%;" data-hotspot="function_keys" aria-label="Hotspot 04: แถบปุ่มฟังก์ชันแถวบน">04</button>
-                <button type="button" class="pr200-hotspot-pin" style="left: 41.5%; top: 54.5%;" data-hotspot="display_screen" aria-label="Hotspot 05: หน้าจอสี 6.5 นิ้ว">05</button>
-                <button type="button" class="pr200-hotspot-pin" style="left: 40.8%; top: 76.8%;" data-hotspot="softkeys" aria-label="Hotspot 06: ซอฟต์คีย์ F1–F7">06</button>
-                <button type="button" class="pr200-hotspot-pin" style="left: 69.8%; top: 45.8%;" data-hotspot="rotary_knob" aria-label="Hotspot 07: ลูกบิด Rotary ใหญ่ด้านหน้า">07</button>
-                <button type="button" class="pr200-hotspot-pin" style="left: 66.2%; top: 68.2%;" data-hotspot="numeric_keypad" aria-label="Hotspot 08: แป้นตัวเลข & Unit Keys">08</button>
-                <button type="button" class="pr200-hotspot-pin" style="left: 75.2%; top: 67.5%;" data-hotspot="cursor_keys" aria-label="Hotspot 09: ปุ่มลูกศรนำทาง">09</button>
-                <button type="button" class="pr200-hotspot-pin" style="left: 76.5%; top: 76.8%;" data-hotspot="power_button" aria-label="Hotspot 10: ปุ่มเปิด-ปิดเครื่อง & LED">10</button>
-                <button type="button" class="pr200-hotspot-pin" style="left: 64.0%; top: 32.5%;" data-hotspot="lock_button" aria-label="Hotspot 11: ปุ่ม Lock & Stealth Mode">11</button>
-                <button type="button" class="pr200-hotspot-pin" style="left: 21.5%; top: 31.0%;" data-hotspot="bumpers_mounts" aria-label="Hotspot 12: ขอบยางกันกระแทก & ห่วงสายสะพาย">12</button>
+                  <!-- 14 Interactive Hotspot Pins -->
+                  <button type="button" class="pr200-hotspot-pin" style="left: 49.6%; top: 26.2%;" data-hotspot="rf_in" aria-label="Hotspot 01: พอร์ต RF IN">01</button>
+                  <button type="button" class="pr200-hotspot-pin" style="left: 61.6%; top: 26.9%;" data-hotspot="top_tuning" aria-label="Hotspot 02: ลูกบิดจูนความถี่ด้านบน">02</button>
+                  <button type="button" class="pr200-hotspot-pin" style="left: 71.4%; top: 27.5%;" data-hotspot="top_func" aria-label="Hotspot 03: ลูกบิด Function & Volume">03</button>
+                  <button type="button" class="pr200-hotspot-pin" style="left: 50.0%; top: 10.0%;" data-hotspot="carry_strap" aria-label="Hotspot 04: สายสะพายไหล่/อก">04</button>
+                  <button type="button" class="pr200-hotspot-pin" style="left: 50.0%; top: 44.8%;" data-hotspot="display_screen" aria-label="Hotspot 05: หน้าจอสี 6.5 นิ้ว">05</button>
+                  <button type="button" class="pr200-hotspot-pin" style="left: 50.0%; top: 60.7%;" data-hotspot="softkeys" aria-label="Hotspot 06: ซอฟต์คีย์ F1–F6">06</button>
+                  <button type="button" class="pr200-hotspot-pin active" style="left: 50.0%; top: 64.4%;" data-hotspot="function_keys" aria-label="Hotspot 07: แถบปุ่มฟังก์ชันแถวบน">07</button>
+                  <button type="button" class="pr200-hotspot-pin" style="left: 27.3%; top: 67.5%;" data-hotspot="app_key" aria-label="Hotspot 08: ปุ่ม App สีฟ้า">08</button>
+                  <button type="button" class="pr200-hotspot-pin" style="left: 42.0%; top: 74.2%;" data-hotspot="numeric_keypad" aria-label="Hotspot 09: แป้นตัวเลข & Unit Keys">09</button>
+                  <button type="button" class="pr200-hotspot-pin" style="left: 62.5%; top: 71.7%;" data-hotspot="rotary_knob" aria-label="Hotspot 10: ลูกบิด Rotary ใหญ่">10</button>
+                  <button type="button" class="pr200-hotspot-pin" style="left: 73.6%; top: 73.9%;" data-hotspot="history_rec" aria-label="Hotspot 11: ปุ่ม History Play/Pause & Rec">11</button>
+                  <button type="button" class="pr200-hotspot-pin" style="left: 62.5%; top: 82.0%;" data-hotspot="cursor_keys" aria-label="Hotspot 12: ปุ่มลูกศรนำทาง & Enter">12</button>
+                  <button type="button" class="pr200-hotspot-pin" style="left: 27.7%; top: 81.7%;" data-hotspot="power_button" aria-label="Hotspot 13: ปุ่มเปิด-ปิดเครื่อง & LED">13</button>
+                  <button type="button" class="pr200-hotspot-pin" style="left: 74.6%; top: 82.0%;" data-hotspot="lock_button" aria-label="Hotspot 14: ปุ่ม Lock & Stealth Mode">14</button>
 
-                <!-- Virtual Screen Overlay (Positioned exactly over 6.5" LCD) -->
-                <div class="pr200-virtual-screen-overlay" id="pr200VirtualScreen" role="region" aria-label="หน้าจอจำลอง PR200 เสมือนจริง">
-                  <div class="screen-top-bar">
-                    <span id="screenModeTag">RECEIVER · FFM</span>
-                    <span id="screenFreqTag" style="color:#FFF;">103.500 000 MHz</span>
-                    <span id="screenAttTag" style="color:var(--accent-cyan);">DEM: FM</span>
-                  </div>
-                  <div class="screen-content-area" id="screenContentArea">
-                    <canvas id="virtualScreenCanvas" class="screen-canvas-live" width="320" height="200" role="img" aria-label="สเปกตรัมจำลองเสมือนจริงบนหน้าจอ PR200"></canvas>
-                    <div id="virtualScreenModal" class="screen-dialog-modal" style="display:none;"></div>
-                  </div>
-                  <div class="screen-bottom-softkeys">
-                    <div class="screen-softkey-cell active" id="vSoft1">F1: Edit</div>
-                    <div class="screen-softkey-cell" id="vSoft2">F2: Receiver</div>
-                    <div class="screen-softkey-cell" id="vSoft3">F3: Polychrome</div>
-                    <div class="screen-softkey-cell" id="vSoft4">F4: PSCAN</div>
-                    <div class="screen-softkey-cell" id="vSoft5">F5: MSCAN</div>
-                    <div class="screen-softkey-cell" id="vSoft6">F6: Next</div>
-                    <div class="screen-softkey-cell" id="vSoft7">F7: Back</div>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Inspector Card: Detailed Explanation of Clicked Component -->
-              <div class="pr200-inspector-card" id="pr200InspectorCard" aria-live="polite">
-                <div class="pr200-inspector-head">
-                  <div class="pr200-inspector-title" id="inspectorTitle">
-                    แถบปุ่มฟังก์ชันหลักแถวบน (Top-Row Function Keys)
-                  </div>
-                  <div class="pr200-inspector-meta">
-                    <span class="pr200-inspector-badge badge-location" id="inspectorLocation">📍 ด้านหน้าเหนือหน้าจอ (Front Upper)</span>
-                    <span class="pr200-inspector-badge badge-type" id="inspectorType">⚙️ Function Hardkeys</span>
+                  <!-- Virtual Screen Overlay (Fitted over 6.5" LCD) -->
+                  <div class="pr200-virtual-screen-overlay" id="pr200VirtualScreen" role="region" aria-label="หน้าจอจำลอง PR200 เสมือนจริง">
+                    <div class="screen-top-bar">
+                      <span id="screenModeTag">RECEIVER · FFM</span>
+                      <span id="screenFreqTag" style="color:#FFF;">103.500 000 MHz</span>
+                      <span id="screenAttTag" style="color:var(--accent-cyan);">DEM: FM</span>
+                    </div>
+                    <div class="screen-content-area" id="screenContentArea">
+                      <canvas id="virtualScreenCanvas" class="screen-canvas-live" width="280" height="180" role="img" aria-label="สเปกตรัมจำลองเสมือนจริงบนหน้าจอ PR200"></canvas>
+                      <div id="virtualScreenModal" class="screen-dialog-modal" style="display:none;"></div>
+                    </div>
+                    <div class="screen-bottom-softkeys">
+                      <div class="screen-softkey-cell active" id="vSoft1">F1: Edit</div>
+                      <div class="screen-softkey-cell" id="vSoft2">F2: Receiver</div>
+                      <div class="screen-softkey-cell" id="vSoft3">F3: Polychrome</div>
+                      <div class="screen-softkey-cell" id="vSoft4">F4: PSCAN</div>
+                      <div class="screen-softkey-cell" id="vSoft5">F5: MSCAN</div>
+                      <div class="screen-softkey-cell" id="vSoft6">F6: Next</div>
+                    </div>
                   </div>
                 </div>
 
-                <p class="inspector-section-content" id="inspectorDesc" style="margin-bottom: 14px;">
-                  ปุ่มกดฮาร์ดแวร์แถวบนสำหรับเข้าสู่พารามิเตอร์การวัดหลักได้ทันที ตอบสนองฉับไว ออกแบบมาให้กดได้แม่นยำแม้ขณะสวมถุงมือปฏิบัติการภาคสนาม
-                </p>
-
-                <div class="pr200-inspector-grid">
-                  <div>
-                    <div class="inspector-section-label">📋 ขั้นตอนและวิธีใช้งานจริงหน้างาน (Field Operation Steps)</div>
-                    <ul class="pr200-workflow-steps" id="inspectorWorkflow" style="margin: 0;">
-                      <li>กด [Freq]: กำหนดความถี่ Center Frequency, Start/Stop Freq, หรือเลือกตารางช่องสัญญาณ</li>
-                      <li>กด [Span]: ปรับความกว้างแถบสเปกตรัมที่แสดงผล (ตั้งแต่ 1 kHz จนถึง Real-time Bandwidth 40 MHz)</li>
-                      <li>กด [Dem BW]: เลือกแบนด์วิดท์ตัวกรองเสียง (เช่น 150 kHz สำหรับ FM, 9 kHz สำหรับ AM, 300 kHz สำหรับดิจิทัล)</li>
-                      <li>กด [Demod]: เลือกชนิดการถอดรหัสเสียง (FM, AM, Pulse, USB, LSB, CW, IQ)</li>
-                      <li>กด [App]: เปิดหน้าต่างเลือกแอปพลิเคชัน (Receiver, Polychrome, PScan, MScan, FScan, Level Mapping)</li>
-                    </ul>
+                <!-- Right Column: Inspector Panel & Specs -->
+                <div class="pr200-inspector-col">
+                  <!-- Hardware Identity Banner -->
+                  <div style="background: rgba(20,20,27,0.75); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 14px 18px; margin-bottom: 14px;">
+                    <div style="font-size: 11px; font-family: var(--font-mono); color: var(--accent-amber); letter-spacing: 0.5px; font-weight: bold; margin-bottom: 4px;">
+                      ROHDE & SCHWARZ® PR200 PORTABLE MONITORING RECEIVER
+                    </div>
+                    <div style="font-size: 13px; color: var(--text-secondary); line-height: 1.55;">
+                      เครื่องรับตรวจวัดสัญญาณวิทยุภาคสนามแบบพกพาขนาดกะทัดรัด (Handheld) ความถี่ <strong>8 kHz ถึง 8 GHz</strong> (ขยายได้ถึง 33 GHz ด้วยเสา HE800-DC30) แบนด์วิดท์ Real-time สูงสุด <strong>40 MHz</strong> กวาดสัญญาณเร็ว 60 GHz/s ออกแบบเพื่อการค้นหาสัญญาณรบกวน (Interference Hunting) และตรวจจับทิศทางสัญญาณ (Direction Finding) น้ำหนักเบาเพียง 3.5 กก. รวมแบตเตอรี่
+                    </div>
                   </div>
-                  <div>
-                    <div class="inspector-protip-box" id="inspectorProTip">
-                      <strong>💡 Pro Tip / เทคนิคสนาม:</strong> เมื่ออยู่ในแอปพลิเคชันใดก็ตาม การกดปุ่ม Hardkey เหล่านี้จะเรียกเมนูย่อยของพารามิเตอร์นั้นมาแสดงที่แถบ Softkey F1–F7 ใต้จอทันที
+
+                  <!-- Inspector Card: Detailed Explanation of Clicked Component -->
+                  <div class="pr200-inspector-card" id="pr200InspectorCard" aria-live="polite">
+                    <div class="pr200-inspector-head">
+                      <div class="pr200-inspector-title" id="inspectorTitle">
+                        แถบปุ่มฟังก์ชันหลักแถวบน (Top-Row Function Keys)
+                      </div>
+                      <div class="pr200-inspector-meta">
+                        <span class="pr200-inspector-badge badge-location" id="inspectorLocation">📍 ด้านหน้าเหนือหน้าจอ (Front Upper)</span>
+                        <span class="pr200-inspector-badge badge-type" id="inspectorType">⚙️ Function Hardkeys</span>
+                      </div>
+                    </div>
+
+                    <p class="inspector-section-content" id="inspectorDesc" style="margin-bottom: 14px;">
+                      ปุ่มกดฮาร์ดแวร์แถวบนสำหรับเข้าสู่พารามิเตอร์การวัดหลักได้ทันที ตอบสนองฉับไว ออกแบบมาให้กดได้แม่นยำแม้ขณะสวมถุงมือปฏิบัติการภาคสนาม
+                    </p>
+
+                    <div class="pr200-inspector-grid">
+                      <div>
+                        <div class="inspector-section-label">📋 ขั้นตอนและวิธีใช้งานจริงหน้างาน (Field Operation Steps)</div>
+                        <ul class="pr200-workflow-steps" id="inspectorWorkflow" style="margin: 0;">
+                          <li>กด [Freq]: กำหนดความถี่ Center Frequency, Start/Stop Freq, หรือเลือกตารางช่องสัญญาณ</li>
+                          <li>กด [Span]: ปรับความกว้างแถบสเปกตรัมที่แสดงผล (ตั้งแต่ 1 kHz จนถึง Real-time Bandwidth 40 MHz)</li>
+                          <li>กด [Dem BW]: เลือกแบนด์วิดท์ตัวกรองเสียง (เช่น 150 kHz สำหรับ FM, 9 kHz สำหรับ AM, 300 kHz สำหรับดิจิทัล)</li>
+                          <li>กด [Demod]: เลือกชนิดการถอดรหัสเสียง (FM, AM, Pulse, USB, LSB, CW, IQ)</li>
+                          <li>กด [App]: เปิดหน้าต่างเลือกแอปพลิเคชัน (Receiver, Polychrome, PScan, MScan, FScan, Level Mapping)</li>
+                        </ul>
+                      </div>
+                      <div>
+                        <div class="inspector-protip-box" id="inspectorProTip">
+                          <strong>💡 Pro Tip / เทคนิคสนาม:</strong> เมื่ออยู่ในแอปพลิเคชันใดก็ตาม การกดปุ่ม Hardkey เหล่านี้จะเรียกเมนูย่อยของพารามิเตอร์นั้นมาแสดงที่แถบ Softkey F1–F6 ใต้จอทันที
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -349,7 +366,7 @@
               <span class="badge">03</span> คู่มือควบคุมปุ่มกดจริง & วิธีตั้งค่า 7 เวิร์กโฟลว์หลัก (Real Controls Reference & 7 Field Workflows)
             </h3>
             <p class="tech-paragraph">
-              การปฏิบัติงานภาคสนามต้องการความรวดเร็วและแม่นยำสูง ผู้ตรวจการจำเป็นต้องจำตำแหน่งปุ่มกดและลำดับคำสั่ง (Key Sequences) ได้อย่างแม่นยำ โดยตัวเครื่อง PR200 แบ่งโซนควบคุมออกเป็น <strong>4 โซนหลัก</strong>:
+              การปฏิบัติงานภาคสนามต้องการความรวดเร็วและแม่นยำสูง ผู้ตรวจการจำเป็นต้องจำตำแหน่งปุ่มกดและลำดับคำสั่ง (Key Sequences) ได้อย่างแม่นยำ โดยตัวเครื่อง PR200 แบ่งโซนควบคุมออกเป็น <strong>5 โซนหลัก</strong>:
             </p>
 
             <div class="tech-table-wrap">
@@ -364,28 +381,34 @@
                 </thead>
                 <tbody>
                   <tr>
-                    <td class="mono" style="color:var(--accent-amber); font-weight:bold;">1. Top-Row Hardkeys</td>
-                    <td><span class="pr200-key-tag">Freq</span> <span class="pr200-key-tag">Span</span> <span class="pr200-key-tag">Dem BW</span> <span class="pr200-key-tag">Demod</span> <span class="pr200-key-tag">App</span> <span class="pr200-key-tag">Setup</span></td>
-                    <td>เข้าสู่พารามิเตอร์การวัดหลักได้ในคลิกเดียวโดยไม่ต้องผ่านเมนูย่อย</td>
-                    <td>เรียกแถบคำสั่งย่อยมาแสดงบน Softkeys F1–F7 ทันที</td>
+                    <td class="mono" style="color:var(--accent-amber); font-weight:bold;">1. Top-Panel Knobs & Ports</td>
+                    <td>พอร์ต <span class="pr200-key-tag">RF IN</span> (50 Ω Snap-N/N-type), <span class="pr200-key-tag">Top Tuning Knob</span>, <span class="pr200-key-tag">Function Knob</span> (Push MGC/Squelch/Tone), <span class="pr200-key-tag">Volume</span>, Headphone Jack 3.5mm</td>
+                    <td>กวาดจูนความถี่หลัก เลื่อนสเกล ตัดเสียงซ่า (Squelch) และปรับระดับเสียงทางหูฟังได้คล่องตัวขณะสะพายเครื่องหรือถือมือเดียว</td>
+                    <td>หมุนปรับต่อเนื่องแบบ Real-time พร้อมปุ่มกดกึ่งกลางสลับพารามิเตอร์</td>
                   </tr>
                   <tr>
-                    <td class="mono" style="color:#38BDF8; font-weight:bold;">2. Context Softkeys</td>
-                    <td><span class="pr200-key-tag">F1</span> ถึง <span class="pr200-key-tag">F7</span> (ใต้หน้าจอ 6.5")</td>
-                    <td>เปลี่ยนหน้าที่ตามบริบทเมนู (Dynamic Mapping) โดยปุ่ม <span class="pr200-key-tag">F6</span> ทำหน้าที่ Next Row เสมอ</td>
-                    <td>เลือกคำสั่งย่อยในแต่ละแอปพลิเคชัน</td>
+                    <td class="mono" style="color:#F59E0B; font-weight:bold;">2. Top-Row Function Keys</td>
+                    <td><span class="pr200-key-tag">Freq</span> <span class="pr200-key-tag">Dem</span> <span class="pr200-key-tag">Spectrum</span> <span class="pr200-key-tag">Trace</span> <span class="pr200-key-tag">Gain</span> <span class="pr200-key-tag">Marker</span> <span class="pr200-key-tag">Meas</span> <span class="pr200-key-tag" style="border-color:#10B981; color:#10B981;">Preset</span></td>
+                    <td>เข้าถึงพารามิเตอร์การวัดหลักทั้ง 8 กลุ่มได้ในคลิกเดียวโดยไม่ต้องเปิดเมนูซ้อนลึก พร้อมปุ่ม Preset คืนค่าพื้นฐานทันที</td>
+                    <td>เรียกแถบคำสั่งย่อยและพารามิเตอร์มาแสดงบน Dynamic Softkeys F1–F6 ทันที</td>
                   </tr>
                   <tr>
-                    <td class="mono" style="color:#10B981; font-weight:bold;">3. Numeric & Direct Units</td>
-                    <td>แป้นพิมพ์ <span class="pr200-key-tag">0–9</span>, <span class="pr200-key-tag">.</span>, <span class="pr200-key-tag">-</span> + <span class="pr200-key-tag">GHz</span> <span class="pr200-key-tag">MHz</span> <span class="pr200-key-tag">kHz</span> <span class="pr200-key-tag">dBm</span></td>
-                    <td>ป้อนค่าตัวเลขความถี่และกำลังส่ง พร้อมยืนยันหน่วยวัดวิศวกรรมทันทีโดยไม่ต้องกดปุ่ม Enter ซ้ำ</td>
-                    <td>บันทึกค่าและเปลี่ยนความถี่ทันทีที่กดปุ่มหน่วย</td>
+                    <td class="mono" style="color:#38BDF8; font-weight:bold;">3. Dynamic Softkeys F1–F6</td>
+                    <td><span class="pr200-key-tag">F1</span> ถึง <span class="pr200-key-tag">F6</span> (ใต้หน้าจอ 6.5" VGA ตรงตำแหน่ง Bezel)</td>
+                    <td>เปลี่ยนหน้าที่ตามบริบทเมนู (Context-Sensitive Mapping) ควบคุมคำสั่งย่อยของแอปพลิเคชันหรือพารามิเตอร์ที่กำลังเลือก</td>
+                    <td>กดเลือกฟังก์ชันย่อยตามป้ายกำกับบนจอ LCD เหนือปุ่มนั้นๆ</td>
                   </tr>
                   <tr>
-                    <td class="mono" style="color:#A78BFA; font-weight:bold;">4. Rotary Knobs & Audio</td>
-                    <td>Front Rotary + Center <span class="pr200-key-tag">OK</span>, Top Tuning Knob, Function Knob (Squelch/Tone), Volume</td>
-                    <td>หมุนกวาดความถี่ละเอียด เลื่อนเคอร์เซอร์ ตัดเสียงซ่า (Squelch) และปรับระดับเสียงทางหูฟัง</td>
-                    <td>หมุนปรับต่อเนื่องแบบ Real-time พร้อมแรงต้านเบาๆ (Tactile Clicks)</td>
+                    <td class="mono" style="color:#06B6D4; font-weight:bold;">4. Left Vertical Column</td>
+                    <td><span class="pr200-key-tag" style="border-color:#38BDF8; color:#38BDF8;">App</span> (ปุ่มกลมสีฟ้า), <span class="pr200-key-tag">App Config</span>, <span class="pr200-key-tag">Disp</span>, <span class="pr200-key-tag">Step</span>, <span class="pr200-key-tag">Power</span> (พร้อมไฟ LED)</td>
+                    <td>สลับแอปพลิเคชันหลัก (Receiver, Polychrome, PScan, MScan, FScan, Level Mapping), คอนฟิกระบบลึก (Dual VFO), ปรับขนาดก้าวความถี่ และควบคุมพลังงาน</td>
+                    <td>กดเปิดกล่องโต้ตอบเลือกแอป หรือสลับโหมดหน้าจอทันที</td>
+                  </tr>
+                  <tr>
+                    <td class="mono" style="color:#10B981; font-weight:bold;">5. Rotary, History & Keypad</td>
+                    <td>Front Precision Rotary + <span class="pr200-key-tag">Enter</span>, <span class="pr200-key-tag">Play/Pause ▶||</span> (History Buffer), <span class="pr200-key-tag" style="border-color:#F43F5E; color:#F43F5E;">REC</span>, D-Pad 4 ทิศ, แป้นพิมพ์ตัวเลข <span class="pr200-key-tag">0–9</span>, แป้นหน่วยวิศวกรรมตรง (<span class="pr200-key-tag">GHz/n</span> <span class="pr200-key-tag">MHz/µ</span> <span class="pr200-key-tag">kHz/m</span> <span class="pr200-key-tag">x1/Hz/dBm</span>), ปุ่ม <span class="pr200-key-tag">📷 Screenshot</span>, และ <span class="pr200-key-tag">Lock 🔒</span> (Stealth Mode)</td>
+                    <td>ป้อนค่าตัวเลขความถี่พร้อมหน่วยเสร็จในคลิกเดียว หยุด/เล่นย้อนหลังสเปกตรัม (History Replay) เพื่อวิเคราะห์สัญญาณ Burst, บันทึกข้อมูลลง SD Card และล็อกเครื่องป้องกันสัมผัสพลาด</td>
+                    <td>หมุนพร้อมแรงต้านละเอียด (Tactile Click), ป้อนตัวเลขและเปลี่ยนความถี่ทันทีเมื่อกดปุ่มหน่วย</td>
                   </tr>
                 </tbody>
               </table>

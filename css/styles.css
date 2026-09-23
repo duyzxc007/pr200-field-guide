@@ -1619,17 +1619,31 @@ body {
   box-shadow: 0 0 14px rgba(250, 204, 21, 0.35);
 }
 
+/* Two-column Layout for PR200 Console */
+.pr200-console-layout {
+  display: grid;
+  grid-template-columns: minmax(320px, 460px) 1fr;
+  gap: 24px;
+  align-items: start;
+}
+
+@media (max-width: 992px) {
+  .pr200-console-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
 /* Stage & Hotspots */
 .pr200-stage-wrapper {
   position: relative;
   width: 100%;
-  max-width: 960px;
+  max-width: 460px;
   margin: 0 auto;
   border-radius: var(--radius-md);
   overflow: hidden;
-  box-shadow: 0 10px 32px rgba(0, 0, 0, 0.7);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.8);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  background: #000;
+  background: #0B0B0E;
 }
 
 .pr200-base-img {
@@ -1643,16 +1657,16 @@ body {
 /* Animated Hotspot Pins */
 .pr200-hotspot-pin {
   position: absolute;
-  width: 28px;
-  height: 28px;
-  margin-left: -14px;
-  margin-top: -14px;
+  width: 26px;
+  height: 26px;
+  margin-left: -13px;
+  margin-top: -13px;
   border-radius: 50%;
-  background: rgba(20, 20, 27, 0.85);
+  background: rgba(20, 20, 27, 0.88);
   border: 2px solid var(--accent-amber);
   color: var(--accent-amber);
   font-weight: 700;
-  font-size: 12px;
+  font-size: 11px;
   font-family: var(--font-mono);
   display: flex;
   align-items: center;
@@ -1670,7 +1684,7 @@ body {
     box-shadow: 0 0 0 0 rgba(250, 204, 21, 0.75);
   }
   70% {
-    box-shadow: 0 0 0 12px rgba(250, 204, 21, 0);
+    box-shadow: 0 0 0 10px rgba(250, 204, 21, 0);
   }
   100% {
     box-shadow: 0 0 0 0 rgba(250, 204, 21, 0);
@@ -1698,16 +1712,16 @@ body {
   z-index: 20;
 }
 
-/* Virtual Screen Overlay */
+/* Virtual Screen Overlay - Fitted on 6.5" LCD */
 .pr200-virtual-screen-overlay {
   position: absolute;
-  left: 25.4%;
-  top: 35.8%;
-  width: 32.7%;
-  height: 38.2%;
-  background: rgba(8, 12, 22, 0.94);
+  left: 25.7%;
+  top: 37.8%;
+  width: 48.6%;
+  height: 20.0%;
+  background: rgba(8, 12, 22, 0.96);
   border: 1px solid rgba(56, 189, 248, 0.45);
-  border-radius: 4px;
+  border-radius: 3px;
   overflow: hidden;
   z-index: 6;
   display: flex;
