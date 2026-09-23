@@ -3353,6 +3353,657 @@ class PolychromeSimulator {
   }
 }
 
+/* =========================================================================
+   PR200 HARDWARE INTERACTIVE CONSOLE CONTROLLER
+   ========================================================================= */
+class PR200HardwareConsole {
+  constructor() {
+    this.currentHotspot = 'function_keys';
+    this.currentMode = 'inspector'; // 'inspector' or 'console'
+    this.screenState = 'normal'; // 'normal', 'app_select', 'freq_input', 'demod_menu', 'stealth', 'power_status'
+    this.centerFreq = 103.500; // MHz
+    this.demodType = 'FM';
+    this.activeApp = 'Receiver';
+    this.squelchLevel = -85; // dBm
+    this.lockClickCount = 0;
+    this.lockClickTimer = null;
+    this.rotaryAngle = 0;
+    this.animFrameId = null;
+
+    this.hotspotData = {
+      'rf_in': {
+        nameTh: 'พอร์ตรับสัญญาณวิทยุ RF IN (Snap-N / N-Type)',
+        nameEn: 'RF Input Port (8 kHz – 8 GHz, 50 Ω)',
+        location: 'ด้านบนซ้าย (Top Panel)',
+        type: 'RF Port',
+        desc: 'พอร์ตรับสัญญาณหลักของเครื่อง รองรับความถี่กว้างพิเศษตั้งแต่ 8 kHz ถึง 8 GHz พร้อม Dynamic Range สูง ออกแบบเป็นขั้ว N-Type มาตรฐานที่รองรับทั้งเกลียว N ปกติ และหัวสวมเร็ว Snap-N สำหรับภาคสนาม',
+        workflow: [
+          'ตรวจสอบระดับสัญญาณ: ห้ามเกิน +20 dBm (0.1 W) / 0 V DC เด็ดขาดเพื่อป้องกัน Front-End เสียหาย',
+          'การต่อสาย Snap-N: ดันปลอกหัวต่อเข้าตรงๆ จนได้ยินเสียงคลิก (ถอดสลับสายอากาศได้ใน 1 วินาที)',
+          'การต่อสายเกลียว N-Type: ขันเกลียวให้แน่นพอดีมือ (Hand-tight) ห้ามใช้คีมบิดเกลียวแน่นเกินไป',
+          'เมื่อสงสัยว่าสัญญาณหน้างานแรงผิดปกติ (> 0 dBm): ให้ต่อ Variable Attenuator 10–20 dB ก่อนเข้าพอร์ตเสมอ'
+        ],
+        protip: 'มีฝายางกันละอองน้ำและฝุ่นมาตรฐาน IP54 ครอบไว้เสมอเมื่อไม่ได้ต่อสายอากาศ เพื่อป้องกันความชื้นและฝุ่นทรายเข้าแกน Coaxial'
+      },
+      'top_tuning': {
+        nameTh: 'ลูกบิดหมุนจูนความถี่ด้านบน (Top Rotary Knob)',
+        nameEn: 'Top Frequency Tuning Knob',
+        location: 'ด้านบนกึ่งกลาง (Top Center)',
+        type: 'Rotary Control',
+        desc: 'ลูกบิดหมุนปรับจูนความถี่ละเอียดที่ออกแบบไว้ด้านบนตัวเครื่องโดยเฉพาะ เพื่อให้ผู้ปฏิบัติงานสามารถเอื้อมมือปรับจูนความถี่ได้สะดวกรวดเร็วขณะสะพายเครื่องแนบลำตัว (Harness Field Operation)',
+        workflow: [
+          'สะพายเครื่อง PR200 แนบข้างสะโพกหรือหน้าอกด้วยสายสะพาย 4 จุด',
+          'เอื้อมมือข้างที่ว่างหมุนลูกบิดด้านบนเพื่อปรับเลื่อนความถี่ตาม Frequency Step (เช่น ทีละ 25 kHz หรือ 100 kHz)',
+          'สามารถกดลูกบิดเพื่อสลับระหว่างการจูนหยาบ (Coarse) และจูนละเอียด (Fine Tuning)',
+          'ใช้งานร่วมกับเสียง Level Tone ทางหูฟังเพื่อกวาดหาทิศทางโดยไม่ต้องก้มมองหน้าจอ'
+        ],
+        protip: 'การใช้ลูกบิดด้านบนช่วยเพิ่มความคล่องตัวในสนามขึ้นอย่างมาก โดยเฉพาะการเดินสำรวจ (Walk Test) ในพื้นที่แคบหรือขึ้นบันได'
+      },
+      'top_func': {
+        nameTh: 'ลูกบิดมัลติฟังก์ชัน & วอลลุ่มเสียง (Function Knob & Audio)',
+        nameEn: 'Top Function Knob (MGC / Squelch / Tone) & Audio Volume',
+        location: 'ด้านบนขวา (Top Right)',
+        type: 'Audio & Control',
+        desc: 'ชุดควบคุมเสียงภาคสนาม ประกอบด้วยลูกบิด Volume เปิด/ปิดเสียง, ช่องเสียบหูฟัง 3.5 mm Stereo, และลูกบิดฟังก์ชันอเนกประสงค์สำหรับกดเลือกและหมุนปรับ MGC, Squelch, และ Tone Pitch',
+        workflow: [
+          'หมุนลูกบิด Volume: เปิดสวิตช์และหมุนปรับระดับความดังของเสียง Demodulation',
+          'กดลูกบิดฟังก์ชัน (Center Push): สลับเลือกโหมดการควบคุมระหว่าง [Squelch] → [MGC] → [Tone]',
+          'หมุนปรับค่า Squelch: ตั้งค่าระดับ dBm ให้อยู่เหนือ Noise Floor 3–5 dB เพื่อตัดเสียงซ่าเมื่อไม่มีสัญญาณคลื่นวิทยุ',
+          'ต่อหูฟัง 3.5 mm: ลำโพงในตัวจะตัดเสียงอัตโนมัติ เพื่อไม่ให้รบกวนผู้อื่นและช่วยให้ฟังเสียงสัญญาณอ่อนได้ชัดเจนขึ้น'
+        ],
+        protip: 'ในโหมด Level Tone ความถี่เสียงหวีดจะสูงขึ้นตามความแรงสัญญาณ (dBm) เป็นเครื่องมือชี้ทิศที่ดีที่สุดในการทำ Manual Homing ด้วยเสา HE400'
+      },
+      'function_keys': {
+        nameTh: 'แถบปุ่มฟังก์ชันหลักแถวบน (Top-Row Function Keys)',
+        nameEn: 'Top-Row Function Hardkeys (Freq, Span, Dem BW, Demod, App, Setup)',
+        location: 'ด้านหน้าเหนือหน้าจอ (Front Upper)',
+        type: 'Function Hardkeys',
+        desc: 'ปุ่มกดฮาร์ดแวร์แถวบนสำหรับเข้าสู่พารามิเตอร์การวัดหลักได้ทันที ตอบสนองฉับไว ออกแบบมาให้กดได้แม่นยำแม้ขณะสวมถุงมือปฏิบัติการภาคสนาม',
+        workflow: [
+          'กด [Freq]: กำหนดความถี่ Center Frequency, Start/Stop Freq, หรือเลือกตารางช่องสัญญาณ',
+          'กด [Span]: ปรับความกว้างแถบสเปกตรัมที่แสดงผล (ตั้งแต่ 1 kHz จนถึง Real-time Bandwidth 40 MHz)',
+          'กด [Dem BW]: เลือกแบนด์วิดท์ตัวกรองเสียง (เช่น 150 kHz สำหรับ FM, 9 kHz สำหรับ AM, 300 kHz สำหรับดิจิทัล)',
+          'กด [Demod]: เลือกชนิดการถอดรหัสเสียง (FM, AM, Pulse, USB, LSB, CW, IQ)',
+          'กด [App]: เปิดหน้าต่างเลือกแอปพลิเคชัน (Receiver, Polychrome, PScan, MScan, FScan, Level Mapping)'
+        ],
+        protip: 'เมื่ออยู่ในแอปพลิเคชันใดก็ตาม การกดปุ่ม Hardkey เหล่านี้จะเรียกเมนูย่อยของพารามิเตอร์นั้นมาแสดงที่แถบ Softkey F1–F7 ใต้จอทันที'
+      },
+      'display_screen': {
+        nameTh: 'หน้าจอสีความละเอียดสูง 6.5 นิ้ว (Daylight-Readable LCD)',
+        nameEn: '6.5\" Anti-Glare High-Resolution Display',
+        location: 'กึ่งกลางตัวเครื่อง (Front Center)',
+        type: 'Display',
+        desc: 'จอแสดงผลสีขนาด 6.5 นิ้ว เคลือบสารลดแสงสะท้อน มองเห็นชัดเจนแม้อยู่กลางแดดจัด แสดงผล Real-time Spectrum, Waterfall, Polychrome และแผนที่ OpenStreetMap พร้อมรองรับระบบสัมผัส (Touchscreen)',
+        workflow: [
+          'แถบสถานะด้านบน: แสดงชื่อแอป, Center Frequency, Attenuation (Auto/Manual), และสถานะแบตเตอรี่/GPS',
+          'พื้นที่แสดงผลหลัก: แสดงรูปคลื่นสเปกตรัมและผืนน้ำตกความถี่พร้อมกันบนแกนความถี่เดียวกัน',
+          'การแตะสัมผัส: สามารถใช้นิ้วแตะที่ยอดคลื่นเพื่อวาง Peak Marker หรือลากเพื่อเลื่อนความถี่ได้โดยตรง',
+          'แถบ Softkeys ด้านล่าง: แสดงฟังก์ชันของปุ่ม F1–F7 ที่เปลี่ยนไปตามแต่ละเมนู'
+        ],
+        protip: 'หากใช้งานในสภาพแวดล้อมฝนตกหรือสวมถุงมือหนา สามารถปิดระบบ Touchscreen แล้วควบคุมด้วยปุ่มกด 100% ได้อย่างปลอดภัย'
+      },
+      'softkeys': {
+        nameTh: 'แถบปุ่มซอฟต์คีย์ใต้จอ (Context-Sensitive Softkeys F1–F7)',
+        nameEn: 'Dynamic Softkeys F1 to F7',
+        location: 'แถวล่างใต้หน้าจอ (Front Lower)',
+        type: 'Dynamic Softkeys',
+        desc: 'ชุดปุ่มกด 7 ปุ่มใต้หน้าจอที่เปลี่ยนหน้าที่และป้ายข้อความกำกับตามบริบทของเมนูที่กำลังใช้งาน ช่วยให้เข้าถึงคำสั่งย่อยได้โดยไม่ต้องใช้ระบบสัมผัส',
+        workflow: [
+          'ดูข้อความกำกับที่แถบล่างสุดของจอเหนือปุ่ม F1–F7 เพื่อทราบหน้าที่ปัจจุบัน',
+          'ในหน้าหลักแอป: F1=Edit/Manage, F2=Receiver, F3=Polychrome, F4=PSCAN, F5=MSCAN, F6=Next Row, F7=Back',
+          'ในเมนู Freq: F1=Center Freq, F2=Span, F3=Step Size, F4=Channel Table',
+          'ปุ่ม F6 (Next Row): กดเพื่อสลับไปยังแถวปุ่มซอฟต์คีย์ถัดไปเมื่อเมนูมีคำสั่งเกิน 7 รายการ'
+        ],
+        protip: 'หลังการทำ Factory Reset แอป Receiver จะถูกตั้งเป็นค่าเริ่มต้นที่ปุ่ม F2 เสมอ (F1 จะเป็นปุ่ม Edit เสมอ)'
+      },
+      'rotary_knob': {
+        nameTh: 'ปุ่มหมุนปรับจูนความละเอียดสูงด้านหน้า (Front Precision Rotary Knob)',
+        nameEn: 'Rotary Knob with Center [OK] Push Button',
+        location: 'ด้านขวาของหน้าจอ (Front Right)',
+        type: 'Rotary Encoder',
+        desc: 'อุปกรณ์ควบคุมหลักของเครื่อง PR200 ออกแบบด้วยวงล้อขนาดใหญ่จับถนัดมือ มีร่องยางกันลื่น พร้อมปุ่ม [OK] ตรงกลางสำหรับกดยืนยันการเลือกคำสั่งหรือค่าตัวเลข',
+        workflow: [
+          'หมุนตามเข็มนาฬิกา: เพิ่มค่าความถี่, เพิ่มระดับเสียง, หรือเลื่อนเคอร์เซอร์ลง/ขวา',
+          'หมุนทวนเข็มนาฬิกา: ลดค่าความถี่, ลดระดับเสียง, หรือเลื่อนเคอร์เซอร์ขึ้น/ซ้าย',
+          'กดปุ่มกึ่งกลาง [OK]: ทำหน้าที่เทียบเท่าปุ่ม [Enter] เพื่อยืนยันการเลือกในกล่องข้อความหรือเปิดแอปพลิเคชัน',
+          'การเลือกหลักตัวเลข: กดลูกบิดเพื่อสลับเคอร์เซอร์ไปยังหลัก MHz, kHz หรือ Hz เพื่อจูนความเร็วสูง'
+        ],
+        protip: 'สามารถใช้ลูกบิดนี้ร่วมกับปุ่มลูกศรเพื่อการนำทางเมนูและการตั้งค่าภาคสนามได้รวดเร็วกว่าการกดปุ่มสัมผัสหลายเท่า'
+      },
+      'numeric_keypad': {
+        nameTh: 'แป้นพิมพ์ตัวเลขและปุ่มกำหนดหน่วยตรง (Numeric Keypad & Unit Keys)',
+        nameEn: 'Numeric Keypad (0–9, ., -) & Direct Engineering Unit Keys',
+        location: 'มุมล่างขวาของตัวเครื่อง (Front Lower-Right)',
+        type: 'Input Keypad',
+        desc: 'แป้นพิมพ์ตัวเลข 0–9 จุดทศนิยม เครื่องหมายลบ พร้อมปุ่มลัดหน่วยวัดวิศวกรรม (GHz, MHz, kHz, Hz, dBm, dBµV) ช่วยให้ป้อนค่าความถี่และระดับสัญญาณได้ทันทีโดยไม่ต้องกด Enter',
+        workflow: [
+          'กดปุ่มพารามิเตอร์ที่ต้องการป้อนค่า เช่น กด [Freq] แล้วกด F1 [Center Freq]',
+          'กดตัวเลขบนแป้นพิมพ์ เช่น [1] [0] [3] [.] [5]',
+          'กดปุ่มหน่วยที่ต้องการทันที เช่น [MHz] ค่าจะถูกยืนยันและนำไปใช้งานทันที!',
+          'หากพิมพ์ผิด ให้กดปุ่ม [BACK] เพื่อลบตัวเลขทีละหลัก หรือกดปุ่ม ESC เพื่อยกเลิก'
+        ],
+        protip: 'ฟังก์ชัน Direct Unit Entry (พิมพ์ตัวเลขแล้วกดปุ่มหน่วย) ถือเป็นเอกลักษณ์ของเครื่อง R&S ที่ช่วยลดขั้นตอนการทำงานหน้างานได้กว่าครึ่ง'
+      },
+      'cursor_keys': {
+        nameTh: 'ปุ่มลูกศรนำทาง 4 ทิศทาง (Cursor Navigation Keys)',
+        nameEn: '4-Way Directional Cursor Keys with Center Enter',
+        location: 'ด้านขวาถัดจากแป้นพิมพ์ (Front Right)',
+        type: 'Navigation Keys',
+        desc: 'ชุดปุ่มลูกศร ขึ้น-ลง-ซ้าย-ขวา พร้อมปุ่ม Enter กึ่งกลาง สำหรับเลื่อนแถบเคอร์เซอร์, ปรับเปลี่ยน Reference Level, และเลื่อน Marker ไปตามยอดคลื่น',
+        workflow: [
+          'ลูกศรซ้าย/ขวา: เลื่อน Marker ไปตามแกนความถี่เพื่อวัดความถี่และระดับ dBm ของแต่ละยอดคลื่น',
+          'ลูกศรขึ้น/ลง: ปรับเปลี่ยนค่า Reference Level ทีละ 10 dB หรือเลื่อนรายการใน Memory List / Channel Table',
+          'กดปุ่ม Enter ตรงกลาง: ยืนยันคำสั่งหรือยอมรับการแก้ไขพารามิเตอร์'
+        ],
+        protip: 'เมื่อกดปุ่มลูกศรค้างไว้ เคอร์เซอร์จะเคลื่อนที่ด้วยความเร็วเร่ง (Auto-repeat acceleration) เพื่อข้ามย่านความถี่อย่างรวดเร็ว'
+      },
+      'power_button': {
+        nameTh: 'ปุ่มเปิด-ปิดเครื่อง & ไฟ LED สถานะแบตเตอรี่ (Power Button & Status LED)',
+        nameEn: 'Power Button with Multi-color Battery/Status LED',
+        location: 'มุมขวาล่างสุด (Front Bottom-Right)',
+        type: 'Power & Safety',
+        desc: 'ปุ่มยางเปิด-ปิดเครื่อง พร้อมไฟ LED หลากสีแสดงสถานะการทำงาน การชาร์จ และการแจ้งเตือนความผิดพลาดของระบบพลังงาน',
+        workflow: [
+          'กด 1 ครั้ง: เปิดเครื่อง PR200 (ระบบจะทำการ Self-test และบูตเข้าหน้าจอหลักภายใน ~35 วินาที)',
+          'กดค้าง 1 วินาทีขณะเปิดอยู่: แสดงหน้าต่างยืนยันการปิดเครื่อง (Power Off dialog)',
+          'ไฟเขียวค้าง = เครื่องเปิดทำงานปกติ (Power ON)',
+          'ไฟส้มกะพริบ = กำลังชาร์จแบตเตอรี่ (Charging via Adapter)',
+          'ไฟส้มค้าง = แบตเตอรี่ชาร์จเต็มแล้ว (Fully Charged in Standby)',
+          'ไฟแดงค้าง/กะพริบ = ข้อผิดพลาดของระบบหรืออุณหภูมิแบตเตอรี่สูงเกินเกณฑ์'
+        ],
+        protip: '⚠️ ขั้นตอน Factory Reset ฉุกเฉิน: ขณะเปิดเครื่อง ให้กดปุ่ม Power ค้างไว้ 4 วินาที เครื่องจะล้างค่าและรีเซ็ตระบบกลับสู่ค่าโรงงานอัตโนมัติ'
+      },
+      'lock_button': {
+        nameTh: 'ปุ่มล็อกแป้นพิมพ์ & โหมดพรางตัว (Lock Button & Stealth Mode)',
+        nameEn: 'Keypad Lock & Stealth Mode Control',
+        location: 'ด้านบนเหนือลูกบิด Rotary (Front Upper-Right)',
+        type: 'Security Control',
+        desc: 'ปุ่มควบคุมความปลอดภัย ป้องกันการกดปุ่มโดยไม่ตั้งใจขณะสะพายเดินภาคสนาม และใช้เปิดโหมดพรางตัว (Stealth Mode) สำหรับภารกิจตรวจการลับ',
+        workflow: [
+          'กดปุ่ม Lock 1 ครั้ง: หน้าจอจะแสดงตัวเลือกระหว่าง [Keypad Lock] และ [Stealth Mode]',
+          'เลือก Keypad Lock: ล็อกปุ่มกดทั้งหมดเพื่อป้องกันการกดโดนขณะสะพายเครื่อง (กด Lock ซ้ำเพื่อปลด)',
+          'เลือก Stealth Mode: หน้าจอ LCD ดับสนิท, ไฟ LED ทุกดวงดับสนิท, ล็อกปุ่มทั้งหมด เครื่องจะทำงานตรวจวัดและบันทึกต่อไปอย่างเงียบกริบ',
+          '⚠️ วิธียกเลิก Stealth Mode ฉุกเฉิน: ต้องกดปุ่ม Lock ติดกัน 3 ครั้งอย่างรวดเร็ว (Triple-click Lock key) หน้าจอจึงจะสว่างกลับมา'
+        ],
+        protip: 'Stealth Mode มีความสำคัญสูงสุดในภารกิจเฝ้าตรวจเวลากลางคืน เพื่อไม่ให้แสงจากจอหรือไฟ LED เผยพิกัดของทีมตรวจการ'
+      },
+      'bumpers_mounts': {
+        nameTh: 'ขอบยางกันกระแทก & ห่วงคล้องสายสะพาย (Rugged Bumpers & Harness Mounts)',
+        nameEn: 'Shock-Absorbing Rubber Bumpers & 4-Point Harness Mounts',
+        location: 'มุมทั้งสี่และด้านข้างตัวเครื่อง (Chassis & Corners)',
+        type: 'Physical Protection',
+        desc: 'เกราะยางกันกระแทกสีฟ้า-เทาที่มุมทั้งสี่ ทนต่อการตกกระแทกตามมาตรฐานกองทัพ MIL-STD-810G พร้อมห่วงคล้องสายสะพายเหล็ก 4 จุดสำหรับจัดท่าสะพายเดินสำรวจ',
+        workflow: [
+          'ยึดสายสะพาย 4 จุด: คล้องห่วงทั้ง 4 มุมเพื่อกระจายน้ำหนัก 3.5 kg ลงบนบ่าสองข้างอย่างสมดุล',
+          'ท่าปฏิบัติงานเดินเท้า: เครื่องจะแนบอยู่ระดับอกในมุมที่เอื้อมมือหมุนลูกบิดด้านบนและมองจอได้สะดวก',
+          'การปกป้องภาคสนาม: ขอบยางช่วยซับแรงกระแทกเมื่อวางบนพื้นขรุขระ คอนกรีต หรือตัวถังรถยนต์'
+        ],
+        protip: 'ช่องระบายความร้อนด้านข้างมีซีลกันละอองน้ำและฝุ่นมาตรฐาน IP54 สามารถปฏิบัติงานกลางสายฝนปรอยหรือพื้นที่ฝุ่นละอองสูงได้ปลอดภัย'
+      }
+    };
+
+    this.init();
+  }
+
+  init() {
+    this.bindHotspots();
+    this.bindQuickButtons();
+    this.bindModes();
+    this.initVirtualScreen();
+    this.selectHotspot('function_keys');
+  }
+
+  bindHotspots() {
+    const pins = document.querySelectorAll('.pr200-hotspot-pin');
+    pins.forEach(pin => {
+      const id = pin.getAttribute('data-hotspot');
+      pin.addEventListener('click', (e) => {
+        e.preventDefault();
+        this.selectHotspot(id);
+        this.handlePinAction(id);
+      });
+
+      pin.addEventListener('mouseenter', () => {
+        if (this.currentMode === 'inspector') {
+          this.previewHotspot(id);
+        }
+      });
+    });
+  }
+
+  bindQuickButtons() {
+    const btnReceiver = document.getElementById('btnSimReceiver');
+    const btnAppMenu = document.getElementById('btnSimAppMenu');
+    const btnFreq = document.getElementById('btnSimFreq');
+    const btnDemod = document.getElementById('btnSimDemod');
+    const btnStealth = document.getElementById('btnSimStealth');
+    const btnReset = document.getElementById('btnSimReset');
+
+    if (btnReceiver) {
+      btnReceiver.addEventListener('click', () => {
+        this.selectHotspot('function_keys');
+        this.setScreenState('normal');
+      });
+    }
+
+    if (btnAppMenu) {
+      btnAppMenu.addEventListener('click', () => {
+        this.selectHotspot('function_keys');
+        this.setScreenState('app_select');
+      });
+    }
+
+    if (btnFreq) {
+      btnFreq.addEventListener('click', () => {
+        this.selectHotspot('numeric_keypad');
+        this.setScreenState('freq_input');
+      });
+    }
+
+    if (btnDemod) {
+      btnDemod.addEventListener('click', () => {
+        this.selectHotspot('top_func');
+        this.setScreenState('demod_menu');
+      });
+    }
+
+    if (btnStealth) {
+      btnStealth.addEventListener('click', () => {
+        this.selectHotspot('lock_button');
+        this.toggleStealthMode();
+      });
+    }
+
+    if (btnReset) {
+      btnReset.addEventListener('click', () => {
+        this.centerFreq = 103.500;
+        this.demodType = 'FM';
+        this.activeApp = 'Receiver';
+        this.screenState = 'normal';
+        this.setScreenState('normal');
+        this.selectHotspot('function_keys');
+      });
+    }
+  }
+
+  bindModes() {
+    const modeBtns = document.querySelectorAll('.pr200-mode-btn');
+    modeBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        modeBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        this.currentMode = btn.getAttribute('data-mode');
+      });
+    });
+  }
+
+  selectHotspot(id) {
+    if (!this.hotspotData[id]) return;
+    this.currentHotspot = id;
+
+    // Update active pin visual
+    const pins = document.querySelectorAll('.pr200-hotspot-pin');
+    pins.forEach(p => {
+      if (p.getAttribute('data-hotspot') === id) {
+        p.classList.add('active');
+        p.setAttribute('aria-pressed', 'true');
+      } else {
+        p.classList.remove('active');
+        p.setAttribute('aria-pressed', 'false');
+      }
+    });
+
+    this.renderInspectorCard(this.hotspotData[id]);
+  }
+
+  previewHotspot(id) {
+    if (this.hotspotData[id]) {
+      this.renderInspectorCard(this.hotspotData[id]);
+    }
+  }
+
+  handlePinAction(id) {
+    if (id === 'function_keys') {
+      this.setScreenState('app_select');
+    } else if (id === 'numeric_keypad') {
+      this.setScreenState('freq_input');
+    } else if (id === 'top_func') {
+      this.setScreenState('demod_menu');
+    } else if (id === 'lock_button') {
+      this.toggleStealthMode();
+    } else if (id === 'power_button') {
+      this.setScreenState('power_status');
+    } else if (id === 'rotary_knob' || id === 'top_tuning') {
+      this.rotateDialEffect();
+      this.centerFreq = Number((this.centerFreq + 0.1).toFixed(3));
+      this.updateScreenHeaders();
+    } else if (id === 'softkeys') {
+      this.setScreenState('normal');
+    }
+  }
+
+  rotateDialEffect() {
+    this.rotaryAngle = (this.rotaryAngle + 25) % 360;
+    const pin = document.querySelector('.pr200-hotspot-pin[data-hotspot="rotary_knob"]');
+    if (pin) {
+      pin.style.transform = `scale(1.25) rotate(${this.rotaryAngle}deg)`;
+    }
+  }
+
+  toggleStealthMode() {
+    if (this.screenState === 'stealth') {
+      this.lockClickCount++;
+      if (this.lockClickCount >= 3) {
+        this.setScreenState('normal');
+        this.lockClickCount = 0;
+      }
+    } else {
+      this.setScreenState('stealth');
+      this.lockClickCount = 0;
+    }
+  }
+
+  renderInspectorCard(data) {
+    const titleEl = document.getElementById('inspectorTitle');
+    const badgeLocEl = document.getElementById('inspectorLocation');
+    const badgeTypeEl = document.getElementById('inspectorType');
+    const descEl = document.getElementById('inspectorDesc');
+    const workflowEl = document.getElementById('inspectorWorkflow');
+    const protipEl = document.getElementById('inspectorProTip');
+
+    if (titleEl) titleEl.textContent = data.nameTh;
+    if (badgeLocEl) badgeLocEl.textContent = `📍 ${data.location}`;
+    if (badgeTypeEl) badgeTypeEl.textContent = `⚙️ ${data.type}`;
+    if (descEl) descEl.textContent = data.desc;
+
+    if (workflowEl) {
+      workflowEl.innerHTML = '';
+      data.workflow.forEach(step => {
+        const li = document.createElement('li');
+        li.textContent = step;
+        workflowEl.appendChild(li);
+      });
+    }
+
+    if (protipEl) {
+      protipEl.innerHTML = `<strong>💡 Pro Tip / เทคนิคสนาม:</strong> ${data.protip}`;
+    }
+  }
+
+  /* =========================================================================
+     VIRTUAL SCREEN CANVAS & MODAL RENDERER
+     ========================================================================= */
+  initVirtualScreen() {
+    const canvas = document.getElementById('virtualScreenCanvas');
+    if (!canvas) return;
+
+    this.screenCtx = canvas.getContext('2d');
+    this.screenCanvas = canvas;
+    this.screenOverlay = document.getElementById('pr200VirtualScreen');
+    this.screenModal = document.getElementById('virtualScreenModal');
+
+    // Virtual Screen click handler
+    if (this.screenOverlay) {
+      this.screenOverlay.addEventListener('click', () => {
+        if (this.screenState === 'stealth') {
+          this.lockClickCount++;
+          if (this.lockClickCount >= 3) {
+            this.setScreenState('normal');
+            this.lockClickCount = 0;
+          }
+        }
+      });
+    }
+
+    this.startVirtualScreenLoop();
+  }
+
+  setScreenState(state) {
+    this.screenState = state;
+    if (!this.screenOverlay) return;
+
+    if (state === 'stealth') {
+      this.screenOverlay.classList.add('screen-stealth');
+    } else {
+      this.screenOverlay.classList.remove('screen-stealth');
+    }
+
+    this.updateScreenHeaders();
+    this.renderModalContent();
+  }
+
+  updateScreenHeaders() {
+    const modeTag = document.getElementById('screenModeTag');
+    const freqTag = document.getElementById('screenFreqTag');
+    const attTag = document.getElementById('screenAttTag');
+
+    if (modeTag) modeTag.textContent = `${this.activeApp.toUpperCase()} · FFM`;
+    if (freqTag) freqTag.textContent = `${this.centerFreq.toFixed(3)} MHz`;
+    if (attTag) attTag.textContent = `DEM: ${this.demodType}`;
+  }
+
+  renderModalContent() {
+    if (!this.screenModal) return;
+
+    if (this.screenState === 'normal') {
+      this.screenModal.style.display = 'none';
+      return;
+    }
+
+    this.screenModal.style.display = 'flex';
+
+    if (this.screenState === 'app_select') {
+      this.screenModal.innerHTML = `
+        <div class="screen-dialog-title">APPLICATION SELECTION (กดปุ่ม App)</div>
+        <div class="screen-app-grid">
+          <div class="screen-app-item ${this.activeApp === 'Receiver' ? 'selected' : ''}" data-app="Receiver">📻 1. Receiver (FFM)</div>
+          <div class="screen-app-item ${this.activeApp === 'Polychrome' ? 'selected' : ''}" data-app="Polychrome">🌈 2. Polychrome</div>
+          <div class="screen-app-item ${this.activeApp === 'PSCAN' ? 'selected' : ''}" data-app="PSCAN">⚡ 3. PSCAN (Panorama)</div>
+          <div class="screen-app-item ${this.activeApp === 'MSCAN' ? 'selected' : ''}" data-app="MSCAN">📋 4. MSCAN (Memory)</div>
+          <div class="screen-app-item ${this.activeApp === 'FSCAN' ? 'selected' : ''}" data-app="FSCAN">🔍 5. FSCAN (Channel)</div>
+          <div class="screen-app-item ${this.activeApp === 'Level Map' ? 'selected' : ''}" data-app="Level Map">🗺️ 6. Level Mapping</div>
+        </div>
+        <div style="font-size:8px; color:var(--text-muted); display:flex; justify-content:space-between;">
+          <span>หมุน Rotary เพื่อเลือก</span>
+          <span>กดปุ่ม [OK] เพื่อเปิด</span>
+        </div>
+      `;
+
+      // Bind selection clicks
+      const appItems = this.screenModal.querySelectorAll('.screen-app-item');
+      appItems.forEach(item => {
+        item.addEventListener('click', (e) => {
+          e.stopPropagation();
+          this.activeApp = item.getAttribute('data-app');
+          this.setScreenState('normal');
+        });
+      });
+
+    } else if (this.screenState === 'freq_input') {
+      this.screenModal.innerHTML = `
+        <div class="screen-dialog-title">SET CENTER FREQUENCY (กด Freq → F1)</div>
+        <div class="screen-freq-display">
+          ${this.centerFreq.toFixed(3)} <span style="font-size:11px;">MHz</span><span class="screen-cursor-blink">_</span>
+        </div>
+        <div style="font-size:8.5px; color:var(--text-secondary); line-height:1.4;">
+          พิมพ์ตัวเลขแล้วกดปุ่มหน่วย <strong>[MHz]</strong> หรือ <strong>[GHz]</strong>
+        </div>
+        <div style="display:flex; gap:4px; margin-top:6px;">
+          <button type="button" class="pr200-quick-btn" style="flex:1; padding:3px; font-size:9px;" id="btnPreset1035">103.5 MHz</button>
+          <button type="button" class="pr200-quick-btn" style="flex:1; padding:3px; font-size:9px;" id="btnPreset4339">433.92 MHz</button>
+          <button type="button" class="pr200-quick-btn" style="flex:1; padding:3px; font-size:9px;" id="btnPreset9200">920.0 MHz</button>
+        </div>
+      `;
+
+      const p1 = this.screenModal.querySelector('#btnPreset1035');
+      const p2 = this.screenModal.querySelector('#btnPreset4339');
+      const p3 = this.screenModal.querySelector('#btnPreset9200');
+      if (p1) p1.addEventListener('click', () => { this.centerFreq = 103.500; this.setScreenState('normal'); });
+      if (p2) p2.addEventListener('click', () => { this.centerFreq = 433.920; this.setScreenState('normal'); });
+      if (p3) p3.addEventListener('click', () => { this.centerFreq = 920.000; this.setScreenState('normal'); });
+
+    } else if (this.screenState === 'demod_menu') {
+      this.screenModal.innerHTML = `
+        <div class="screen-dialog-title">AUDIO DEMODULATION TYPE (กดปุ่ม Demod)</div>
+        <div class="screen-app-grid" style="grid-template-columns: 1fr 1fr 1fr;">
+          <div class="screen-app-item ${this.demodType === 'FM' ? 'selected' : ''}" data-dem="FM">FM (150k)</div>
+          <div class="screen-app-item ${this.demodType === 'AM' ? 'selected' : ''}" data-dem="AM">AM (9k)</div>
+          <div class="screen-app-item ${this.demodType === 'Pulse' ? 'selected' : ''}" data-dem="Pulse">PULSE</div>
+          <div class="screen-app-item ${this.demodType === 'USB' ? 'selected' : ''}" data-dem="USB">USB (3k)</div>
+          <div class="screen-app-item ${this.demodType === 'LSB' ? 'selected' : ''}" data-dem="LSB">LSB (3k)</div>
+          <div class="screen-app-item ${this.demodType === 'CW' ? 'selected' : ''}" data-dem="CW">CW (1k)</div>
+        </div>
+        <div style="font-size:8px; color:var(--text-muted); text-align:right;">
+          Squelch: ${this.squelchLevel} dBm (MGC Mode)
+        </div>
+      `;
+
+      const demItems = this.screenModal.querySelectorAll('.screen-app-item');
+      demItems.forEach(item => {
+        item.addEventListener('click', (e) => {
+          e.stopPropagation();
+          this.demodType = item.getAttribute('data-dem');
+          this.setScreenState('normal');
+        });
+      });
+
+    } else if (this.screenState === 'stealth') {
+      this.screenModal.innerHTML = `
+        <div style="text-align:center; padding:20px 8px; color:#F43F5E;">
+          <div style="font-size:18px; margin-bottom:8px;">🕶️ STEALTH MODE</div>
+          <div style="font-size:10px; color:#94A3B8; line-height:1.5;">
+            หน้าจอ LCD ดับสนิท • ไฟ LED ทุกดวงปิด • ล็อกปุ่มกดทั้งหมด<br>
+            <strong style="color:var(--accent-amber);">วิธียกเลิก: กดปุ่ม Lock ติดกัน 3 ครั้ง</strong>
+          </div>
+          <button type="button" class="pr200-quick-btn" id="btnUnlockStealth" style="margin-top:14px; font-size:10px; border-color:#F43F5E; color:#F43F5E;">
+            🔓 ปลดล็อกหน้าจอ (Triple-Click Lock)
+          </button>
+        </div>
+      `;
+
+      const unlockBtn = this.screenModal.querySelector('#btnUnlockStealth');
+      if (unlockBtn) {
+        unlockBtn.addEventListener('click', () => {
+          this.setScreenState('normal');
+        });
+      }
+
+    } else if (this.screenState === 'power_status') {
+      this.screenModal.innerHTML = `
+        <div class="screen-dialog-title">SYSTEM POWER & BATTERY DIAGNOSTICS</div>
+        <div style="font-size:9.5px; color:var(--text-secondary); line-height:1.6; margin:6px 0;">
+          • แบตเตอรี่หลัก: Smart Li-Ion 6-cell (6400 mAh)<br>
+          • พลังงานคงเหลือ: <strong>88% (3 ชั่วโมง 15 นาที)</strong><br>
+          • แรงดันไฟฟ้า: 11.2 V / 0.85 A (Mains OK)<br>
+          • อุณหภูมิเครื่อง: 34.2 °C (Internal Fan: Normal)
+        </div>
+        <div style="border-top:1px solid rgba(255,255,255,0.1); padding-top:6px; display:flex; justify-content:space-between; align-items:center;">
+          <span style="font-size:8.5px; color:#F59E0B;">กดปุ่ม Power ค้าง 4s เพื่อ Factory Reset</span>
+          <button type="button" class="pr200-quick-btn" id="btnClosePower" style="font-size:9px; padding:2px 8px;">ปิด</button>
+        </div>
+      `;
+
+      const closeBtn = this.screenModal.querySelector('#btnClosePower');
+      if (closeBtn) {
+        closeBtn.addEventListener('click', () => {
+          this.setScreenState('normal');
+        });
+      }
+    }
+  }
+
+  startVirtualScreenLoop() {
+    let t = 0;
+    const render = () => {
+      // Respect visibility and reduced motion
+      if (document.visibilityState === 'visible' && this.screenState === 'normal') {
+        this.drawLiveSpectrum(t);
+        t += 0.08;
+      }
+      this.animFrameId = requestAnimationFrame(render);
+    };
+    render();
+  }
+
+  drawLiveSpectrum(t) {
+    if (!this.screenCtx || !this.screenCanvas) return;
+    const ctx = this.screenCtx;
+    const w = this.screenCanvas.width;
+    const h = this.screenCanvas.height;
+
+    // Background
+    ctx.fillStyle = '#060B14';
+    ctx.fillRect(0, 0, w, h);
+
+    // Spectrum grid
+    ctx.strokeStyle = 'rgba(56, 189, 248, 0.12)';
+    ctx.lineWidth = 1;
+    for (let x = 20; x < w; x += 30) {
+      ctx.beginPath();
+      ctx.moveTo(x, 0);
+      ctx.lineTo(x, h * 0.65);
+      ctx.stroke();
+    }
+    for (let y = 15; y < h * 0.65; y += 20) {
+      ctx.beginPath();
+      ctx.moveTo(0, y);
+      ctx.lineTo(w, y);
+      ctx.stroke();
+    }
+
+    // Spectrum trace
+    ctx.beginPath();
+    ctx.strokeStyle = '#FACC15';
+    ctx.lineWidth = 1.5;
+
+    const midX = w / 2;
+    for (let x = 0; x < w; x += 2) {
+      const noise = (Math.sin(x * 0.15 + t) * 4) + (Math.cos(x * 0.4 - t * 0.5) * 3);
+      let y = (h * 0.52) + noise;
+
+      // Peak at center frequency
+      const dist = Math.abs(x - midX);
+      if (dist < 28) {
+        const peakH = (28 - dist) * 2.8;
+        y -= peakH;
+      }
+
+      if (x === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    }
+    ctx.stroke();
+
+    // Peak Marker
+    ctx.fillStyle = '#EF4444';
+    ctx.beginPath();
+    ctx.moveTo(midX, (h * 0.52) - 82);
+    ctx.lineTo(midX - 4, (h * 0.52) - 90);
+    ctx.lineTo(midX + 4, (h * 0.52) - 90);
+    ctx.closePath();
+    ctx.fill();
+
+    ctx.fillStyle = '#FFF';
+    ctx.font = 'bold 8px monospace';
+    ctx.fillText(`M1: ${this.centerFreq.toFixed(3)} MHz`, midX - 32, (h * 0.52) - 94);
+
+    // Waterfall preview (bottom 35%)
+    const wfTop = h * 0.66;
+    const wfHeight = h - wfTop;
+    ctx.fillStyle = '#020617';
+    ctx.fillRect(0, wfTop, w, wfHeight);
+
+    // Cyan/Amber waterfall stream
+    for (let row = 0; row < wfHeight; row += 4) {
+      const rowY = wfTop + row;
+      const alpha = 0.8 - (row / wfHeight) * 0.6;
+      ctx.fillStyle = `rgba(250, 204, 21, ${alpha * 0.9})`;
+      ctx.fillRect(midX - 6 + Math.sin(row + t) * 2, rowY, 12, 3);
+      ctx.fillStyle = `rgba(56, 189, 248, ${alpha * 0.4})`;
+      ctx.fillRect(midX - 18, rowY, 36, 3);
+    }
+  }
+}
+
 // Global initialization
 window.addEventListener('DOMContentLoaded', () => {
   window.heroSim = new HeroPreviewCanvas('heroCanvas');
@@ -3363,6 +4014,8 @@ window.addEventListener('DOMContentLoaded', () => {
   window.gatedSim = new GatedSpectrumSimulator('canvasGatedSpectrum');
   window.scanModesSim = new ScanModesSimulator('scanModesCanvas');
   window.polychromeSim = new PolychromeSimulator('polychromeCanvas');
+  window.pr200HardwareConsole = new PR200HardwareConsole();
   initRBWCalculator();
   initScanResolutionCalculator();
 });
+

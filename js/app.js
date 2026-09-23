@@ -124,6 +124,8 @@ function updateSidebarActive(chapterKey) {
       title: 'รู้จักเครื่อง & สถาปัตยกรรม 6 งานหลัก',
       items: [
         { id: 'ch1-core-arch', label: '6 งานหลักของ PR200' },
+        { id: 'ch1-interactive-hardware', label: 'กายวิภาคเครื่อง & แอนิเมชั่นปุ่มกด' },
+        { id: 'ch1-button-guide', label: 'คู่มือปุ่มกดจริง & วิธีตั้งค่า 7 สเต็ป' },
         { id: 'ch1-hardware-ports', label: 'พอร์ตเชื่อมต่อ & กายวิภาคฮาร์ดแวร์' },
         { id: 'ch1-stealth-mode', label: 'Stealth Mode & ปลดล็อกฉุกเฉิน' },
         { id: 'ch1-osm-wizard', label: 'แผนที่ RsOsmWizard (โฟลเดอร์ Maps)' },
